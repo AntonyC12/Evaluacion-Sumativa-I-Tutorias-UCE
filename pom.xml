@@ -4,37 +4,54 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.5</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    
     <groupId>com.tutorias</groupId>
     <artifactId>Evaluacion-Sumativa-I-Parte-Practica</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>Evaluacion-Sumativa-I-Parte-Practica</name>
-    <description>Sistema de Gestion de Tutorias Academicas - Version Spaghetti Minima</description>
+    <description>Sistema de Gestion de Tutorias Academicas - Version Capas</description>
 
     <properties>
         <java.version>17</java.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencies>
-        <!-- Solo dependemos del driver de MongoDB, que es muy liviano (aprox. 3MB en total) -->
+        <!-- Spring Boot Starters -->
         <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>mongodb-driver-sync</artifactId>
-            <version>4.11.1</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <!-- Plugin para compilar y ejecutar fácilmente la aplicación con mvn exec:java -->
+            <!-- Spring Boot Maven Plugin -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <!-- Exec Maven Plugin para compatibilidad con NetBeans / IDEs -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <mainClass>com.tutorias.spaghetti.TutoriasSpaghettiApplication</mainClass>
+                    <mainClass>com.tutorias.TutoriasCapasApplication</mainClass>
                 </configuration>
             </plugin>
         </plugins>
