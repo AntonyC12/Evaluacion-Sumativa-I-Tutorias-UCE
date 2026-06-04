@@ -1,0 +1,63 @@
+# Maven build directory
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.nextVal
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/.maven-wrapper.jar
+
+# Compiled class files
+*.class
+
+# Log files
+*.log
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# virtual machine crash logs, see http://www.oracle.com/technetwork/java/javase/community/bugreport-136852.html
+hs_err_pid*
+replay_pid*
+
+# NetBeans IDE files
+**/nbproject/private/
+**/nbbuild/
+**/dist/
+**/nbdist/
+**/.nb-gradle/
+
+# IntelliJ IDEA files
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Eclipse IDE files
+.metadata/
+.classpath
+.project
+.settings/
+*.launch
+.factorypath
+
+# OS files
+Thumbs.db
+EHthumbs.db
+Desktop.ini
+.DS_Store
