@@ -1300,13 +1300,27 @@
         let activeTab = '';
         let devToolbarOpen = true;
 
+        // Helper: safely get correoInstitucional as plain string
+        function getCorreo() {
+            if (!currentUser) return null;
+            const c = currentUser.correoInstitucional;
+            return (c && typeof c === 'object') ? (c.value || '') : (c || '');
+        }
+
         // On Load
         document.addEventListener('DOMContentLoaded', () => {
             // Check session
             const sessionData = sessionStorage.getItem('tutorias_user');
             if (sessionData) {
-                currentUser = JSON.parse(sessionData);
-                initDashboard();
+                const parsed = JSON.parse(sessionData);
+                // Validate: correoInstitucional must be a plain string (not old {value:...} format)
+                if (parsed && typeof parsed.correoInstitucional !== 'string') {
+                    sessionStorage.removeItem('tutorias_user');
+                    showLogin();
+                } else {
+                    currentUser = parsed;
+                    initDashboard();
+                }
             } else {
                 showLogin();
             }
@@ -1461,7 +1475,7 @@
         async function cargarNotificaciones() {
             if (!currentUser) return;
             try {
-                const res = await fetch(`${API_URL}/notificaciones?destinatario=${currentUser.correoInstitucional}`);
+                const res = await fetch(`${API_URL}/notificaciones?destinatario=${encodeURIComponent(getCorreo())}`);
                 if (!res.ok) return;
                 const data = await res.json();
                 
@@ -1702,7 +1716,7 @@
                     body: JSON.stringify({
                         nuevoEstado: 'Cancelada',
                         observacion: 'Cancelado por el estudiante',
-                        usuarioResponsable: currentUser.correoInstitucional
+                        usuarioResponsable: getCorreo()
                     })
                 });
 
@@ -1801,7 +1815,7 @@
                     body: JSON.stringify({
                         nuevoEstado: nuevoEstado,
                         observacion: observacion,
-                        usuarioResponsable: currentUser.correoInstitucional
+                        usuarioResponsable: getCorreo()
                     })
                 });
 
