@@ -1,0 +1,2 @@
+// Este archivo ha sido movido a com.tutorias.domain.enums.EstadoTutoria
+// Ver: src/main/java/com/tutorias/domain/enums/EstadoTutoria.java
