@@ -1,221 +1,232 @@
-# Sistema de Gestión de Tutorías Académicas (Rama: Codigo-Spaghetti)
+# Sistema de Gestión de Tutorías Académicas (Rama: Monolito-Capas)
 
-Este repositorio contiene la primera versión del **Sistema de Gestión de Tutorías Académicas** para un entorno universitario. Este proyecto ha sido desarrollado intencionalmente utilizando un **estilo de código Spaghetti**, concentrando toda la lógica del backend en un único archivo ejecutable y la del frontend en un solo cliente HTML SPA.
+Este repositorio contiene la segunda fase de evolución del **Sistema de Gestión de Tutorías Académicas** para la Universidad Central del Ecuador (UCE). Esta versión representa una refactorización completa del diseño original "Spaghetti" hacia un **Monolito por Capas** estructurado, limpio y desacoplado, utilizando **Spring Boot** y **Spring Data MongoDB**.
 
-El propósito de esta versión es servir como punto de partida para estudiar la evolución del software, permitiendo una comparación directa frente a futuros rediseños estructurados bajo **Arquitectura por Capas** (`Codigo-Capas`) y **Domain-Driven Design** (`Codigo-DDD`). A pesar del acoplamiento deliberado de su arquitectura, el sistema cumple de manera estricta con todas las reglas de negocio y validaciones requeridas.
-
----
-
-## 1. Información de la Rama y Estado del Proyecto
-- **Rama Actual:** `Codigo-Spaghetti`
-- **Estado:** Finalizado y Funcional.
-- **Relación con futuras versiones:**
-  - **`Codigo-Spaghetti` (Esta versión):** Sin separación formal de capas. SQL/NoSQL, validaciones, respuestas HTTP, y control de estados mezclados en un único archivo Java (`TutoriasSpaghettiApplication.java`).
-  - **`Codigo-Capas` (Siguiente fase):** Separación de responsabilidades en capas formales (Controladores, Servicios, Repositorios, DTOs).
-  - **`Codigo-DDD` (Fase final):** Modelado centrado en el dominio, agregados, entidades puras, objetos de valor e inversión de dependencias.
+El objetivo de esta versión es aplicar una separación rigurosa de responsabilidades (Separation of Concerns) e introducir la inversión de dependencias en la persistencia (**Opción A**), asegurando que las reglas de negocio estén centralizadas y protegidas dentro de un **Dominio puro**, libre de acoplamientos técnicos de base de datos.
 
 ---
 
-## 2. Objetivo y Alcance Funcional
+## 1. Arquitectura Lógica y Dirección de Dependencias
 
-### Objetivo General
-Resolver la gestión informal de tutorías académicas y convertirla en un proceso institucional controlado, trazable y con validaciones de reglas de negocio claras para estudiantes, docentes y administradores de la Universidad Central del Ecuador (UCE).
+El sistema backend se organiza en cuatro capas lógicas principales con dependencias estrictamente unidireccionales y descendentes:
 
-### Alcance
-#### Incluye:
-* Autenticación con validación de correo institucional (`@uce.edu.ec`) y control de estado de cuenta.
-* Gestión de disponibilidad de docentes (publicación, edición y eliminación de bloques horarios).
-* Consulta de horarios disponibles filtrados por materia, docente y fecha.
-* Agendamiento de tutorías académicas por parte de estudiantes.
-* Validación estricta de solapamiento de horarios, citas en el pasado y límites semanales de citas por materia/docente.
-* Flujo controlado de estados de tutorías (confirmación, registro de asistencia o inasistencia).
-* Cancelaciones permitidas con un límite mínimo de 24 horas de anticipación para estudiantes.
-* Trazabilidad completa (registro histórico de auditoría de todos los cambios de estado).
-* Servicio de notificación simulado (registro físico en colección de notificaciones de todos los correos de alerta despachados).
-* Administración básica de usuarios (activación/desactivación de cuentas y registro de nuevos usuarios).
+```
+┌─────────────────────────────────────────────────────────┐
+│                   Presentación (REST)                   │
+└────────────────────────────┬────────────────────────────┘
+                             │ (Invoca)
+┌────────────────────────────▼────────────────────────────┐
+│                  Aplicación (Servicios)                 │
+└────────────────────────────┬────────────────────────────┘
+                             │ (Usa contratos / interfaces)
+┌────────────────────────────▼────────────────────────────┐
+│                    Dominio (Modelos)                    │
+└────────────────────────────▲────────────────────────────┘
+                             │ (Implementa contratos)
+┌────────────────────────────┴────────────────────────────┐
+│              Infraestructura (Persistencia)             │
+└─────────────────────────────────────────────────────────┘
+```
 
-#### No incluye (En esta versión):
-* Videollamadas o salas virtuales integradas.
-* Chats en tiempo real.
-* Pasarelas de pago o firmas digitales.
-* Asignación automática mediante Inteligencia Artificial.
-* Integración con calendarios externos (Google Calendar, Outlook).
-* Multi-sedes o multi-facultades.
+1. **Dominio (`com.tutorias.domain`):** Es el corazón del sistema. Contiene las reglas del negocio, validaciones centrales de comportamiento, objetos de valor y las interfaces (contratos) de los repositorios. Es **100% puro**, lo que significa que no contiene anotaciones técnicas de Spring ni anotaciones de MongoDB (como `@Document` o `@Id`).
+2. **Aplicación (`com.tutorias.application`):** Coordina los casos de uso del sistema. Carga las entidades del dominio usando los contratos de repositorio, ejecuta los métodos de comportamiento del dominio para validar las reglas, persiste los resultados de forma atómica y despacha notificaciones y logs de auditoría.
+3. **Presentación (`com.tutorias.presentation`):** Es la puerta de entrada HTTP. Contiene los controladores REST anotados con `@RestController`, los DTOs (`LoginRequest`, `TutoriaRequest`, etc.) para el mapeo JSON, y un manejador global de excepciones (`GlobalExceptionHandler`) que traduce los fallos de negocio en códigos de estado `400 Bad Request` limpios para el frontend.
+4. **Infraestructura (`com.tutorias.infrastructure`):** Contiene los detalles técnicos. Define los documentos físicos de MongoDB (`@Document`), las interfaces de Spring Data `MongoRepository`, los mapeadores de persistencia (`PersistenciaMapper`) y la implementación concreta de los repositorios de dominio, resolviendo la inversión de dependencias.
 
 ---
 
-## 3. Actores del Sistema
+## 2. Mapa de Estructura del Proyecto
 
-### 3.1 Estudiante
-Usuario que solicita tutorías para recibir apoyo académico.
-- **Funciones:** Iniciar sesión, ver docentes y materias disponibles, consultar horarios libres, agendar tutorías, cancelar tutorías (con >= 24h de anticipación) y consultar su historial personal.
+La estructura física del proyecto organizada bajo el paquete raíz `com.tutorias` es la siguiente:
 
-### 3.2 Docente
-Usuario que publica su disponibilidad y atiende las tutorías académicas.
-- **Funciones:** Iniciar sesión, registrar/eliminar sus horarios de disponibilidad, consultar agenda de solicitudes recibidas, confirmar tutorías pendientes y marcar asistencia/inasistencia.
+```
+Evaluacion-Sumativa-I-Parte-Practica/
+│
+├── pom.xml                                           # Configuración de Spring Boot 3.2.5 y dependencias
+├── README.md                                         # Esta documentación detallada
+│
+└── src/
+    ├── main/
+    │   ├── java/
+    │   │   └── com/
+    │   │       └── tutorias/
+    │   │           ├── TutoriasCapasApplication.java # Punto de arranque del servidor Spring Boot
+    │   │           │
+    │   │           ├── domain/                       # [CAPA DE DOMINIO - 100% PURA]
+    │   │           │   ├── model/                    # Entidades puras (Usuario, Tutoria, etc.)
+    │   │           │   ├── valueobject/              # Objetos de Valor (CorreoInstitucional, etc.)
+    │   │           │   ├── repository/               # Contratos/Interfaces de persistencia de dominio
+    │   │           │   └── exception/                # DomainException para reglas de negocio
+    │   │           │
+    │   │           ├── application/                  # [CAPA DE APLICACIÓN - CASOS DE USO]
+    │   │           │   └── service/                  # Servicios (TutoriaService, AuthService, etc.)
+    │   │           │
+    │   │           ├── presentation/                 # [CAPA DE PRESENTACIÓN - REST API]
+    │   │           │   ├── controller/               # Controladores REST y GlobalExceptionHandler
+    │   │           │   └── dto/                      # Data Transfer Objects estables para JSON
+    │   │           │
+    │   │           └── infrastructure/               # [CAPA DE INFRAESTRUCTURA - DETALLES TÉCNICOS]
+    │   │               ├── repository/               # Implementaciones de las interfaces de dominio
+    │   │               │   ├── mongo/                # Spring Data interfaces e infra Mongo
+    │   │               │   │   ├── document/         # Documentos de persistencia (@Document)
+    │   │               │   │   └── mapper/           # Mapeador de datos (Persistencia <-> Dominio)
+    │   │               │   └── ...RepositoryImpl.java
+    │   │               └── config/                   # Sembrador de datos iniciales (DataSeeder)
+    │   │
+    │   └── resources/
+    │       ├── application.properties                # Configuración de puerto y URI de MongoDB
+    │       └── static/
+    │           └── index.html                        # Cliente SPA Glassmorphism (Externo al Backend)
+    │
+    └── test/
+        └── java/
+            └── com/
+                └── tutorias/
+                    └── domain/
+                        └── model/
+                            └── TutoriaTest.java      # Pruebas unitarias de las reglas del dominio
+```
 
-### 3.3 Administrador
-Usuario con permisos globales de supervisión y mantenimiento del sistema.
-- **Funciones:** Crear usuarios de todos los roles, activar o desactivar cuentas, consultar estadísticas globales de tutorías y auditar la trazabilidad de cambios de estados de las citas.
+---
 
-### 3.4 Servicio de Notificación
-Componente interno simulado que registra logs detallados cada vez que una tutoría cambia de estado, se crea o se cancela.
+## 3. Especificación de Validaciones por Capa
+
+Para mantener la cohesión y evitar que la capa de aplicación actúe como un "cajón de sastre", las validaciones se distribuyen estrictamente de la siguiente manera:
+
+* **Presentación (DTOs y Controladores):**
+  - Campos obligatorios nulos o vacíos en peticiones.
+  - Validación sintáctica y de tipos del JSON.
+* **Aplicación (Servicios):**
+  - Existencia real de las entidades relacionadas en base de datos (ej. verificar si el ID del estudiante, el docente o la materia existen antes de agendar).
+  - Carga y recuperación de entidades del dominio.
+  - Comprobación de límites lógicos cruzados (ej. consultar duplicados semanales o solapamientos en base a múltiples registros).
+  - Persistencia de transacciones, logs de auditoría (historial) y disparo de notificaciones.
+* **Dominio (Entidades y Objetos de Valor):**
+  - Formato y sufijo obligatorio del correo institucional (`@uce.edu.ec`).
+  - Restricción temporal de fecha y hora futura para nuevas tutorías.
+  - Sanidad de horas de disponibilidad (`horaInicio < horaFin`).
+  - Ciclo de vida y transiciones válidas de estados de la tutoría.
+  - Regla de las **24 horas de anticipación** real para cancelaciones realizadas por estudiantes (usando `Duration` de Java).
 
 ---
 
 ## 4. Reglas de Negocio Implementadas
 
-### 4.1 Acceso y Seguridad
-- **RN-01 (Correo Institucional):** Solo se permite el acceso a usuarios cuyo correo finalice estrictamente en `@uce.edu.ec`.
-- **RN-02 (Cuentas Activas):** No se permite el ingreso al sistema a usuarios con estado de cuenta `Inactivo`.
-
-### 4.2 Disponibilidad del Docente
-- **RN-03 (Consistencia de Rango):** La hora de inicio del bloque de disponibilidad debe ser estrictamente anterior a la hora de fin.
-- **RN-04 (No Solapamiento):** Un docente no puede registrar una disponibilidad en un horario y fecha que se solape con otro bloque horario activo de sí mismo.
-- **RN-05 (Protección de Reservas):** Un horario de disponibilidad que ya se encuentre con estado `Reservado` no puede ser eliminado por el docente.
-
-### 4.3 Solicitud de Tutoría
-- **RN-06 (Fechas Futuras):** No se pueden registrar tutorías en fechas u horas pasadas con respecto a la hora del servidor.
-- **RN-07 (Límite Semanal):** Un estudiante no puede agendar más de una tutoría con el **mismo docente** y en la **misma materia** dentro de la **misma semana del año** (evita el monopolio de horarios).
-- **RN-08 (Consistencia de Bloque):** La tutoría debe agendarse sobre una disponibilidad exacta creada previamente por el docente.
-
-### 4.4 Estados y Transiciones de Tutorías
-Las tutorías inician en estado `Pendiente`. Los estados válidos son:
-1. `Pendiente`
-2. `Confirmada`
-3. `Asistida` (Estado final)
-4. `Inasistencia` (Estado final)
-5. `Cancelada` (Estado final)
-
-**Transiciones Permitidas:**
-```
-  [Pendiente] ───> [Confirmada] ───> [Asistida] o [Inasistencia]
-       │                 │
-       └─────> [Cancelada] <────────┘
-```
-- No se permiten transiciones desde estados terminales (`Asistida`, `Inasistencia`, `Cancelada`).
-- Una tutoría en estado `Cancelada` no puede revertirse a `Confirmada` o `Pendiente` (se debe generar una solicitud nueva).
-
-### 4.5 Cancelación
-- **RN-09 (Anticipación del Estudiante):** El estudiante solo puede cancelar una tutoría si faltan **24 horas o más** para la fecha y hora de inicio agendada. En caso contrario, el sistema rechaza la operación.
-- **RN-10 (Liberación de Horario):** Cuando una tutoría es cancelada, el bloque de disponibilidad correspondiente del docente se libera de forma automática, volviendo a quedar en estado `Disponible` para otros estudiantes.
-
-### 4.6 Trazabilidad y Notificaciones
-- **RN-11 (Auditoría):** Cada cambio de estado de tutoría debe guardar un registro histórico inmutable con fecha, estado anterior, estado nuevo, descripción/observación y el correo del usuario responsable.
-- **RN-12 (Envío de Notificaciones):** Toda creación, cancelación o cambio de estado genera una notificación automática registrada en el sistema.
+1. **RN-01 (Correo Institucional):** Solo se permite el acceso e inicio de sesión a correos que pertenezcan estrictamente al dominio de la Universidad Central del Ecuador (`@uce.edu.ec`).
+2. **RN-02 (Cuentas Activas):** El sistema bloquea el inicio de sesión y cualquier operación a usuarios marcados con estado `Inactivo`.
+3. **RN-03 (Horarios de Docente Coherentes):** Un docente solo puede registrar bloques de disponibilidad donde la hora de inicio sea menor a la hora de fin.
+4. **RN-04 (No Solapamiento de Disponibilidad):** Un docente no puede registrar bloques horarios disponibles que se crucen en fecha y hora con disponibilidades existentes de sí mismo.
+5. **RN-05 (Protección de Horarios Reservados):** No se permite modificar ni eliminar bloques de disponibilidad que hayan cambiado a estado `Reservado` (agendados por un estudiante).
+6. **RN-06 (Fechas Futuras):** Las tutorías solo se pueden agendar para fechas y horas futuras con respecto al tiempo real de ejecución del servidor.
+7. **RN-07 (Límite Semanal por Materia/Docente):** Un estudiante no puede agendar más de una tutoría activa con el **mismo docente** y en la **misma materia** dentro de la **misma semana del año** (semana calendario calculada de lunes a domingo bajo la norma ISO-8601).
+8. **RN-08 (No Solapamiento del Estudiante):** El sistema impide registrar una tutoría si el estudiante ya cuenta con otra cita activa (estados `Pendiente` o `Confirmada`) cuyos horarios se crucen.
+9. **RN-09 (Estados y Transiciones Terminales):** Una tutoría inicia en `Pendiente`. Puede confirmarse (`Confirmada`), cancelarse (`Cancelada`), o marcarse asistencia/inasistencia (`Asistida`, `Inasistencia`). Ningún estado terminal (`Asistida`, `Inasistencia`, `Cancelada`) puede revertirse o cambiar a otro estado.
+10. **RN-10 (Regla de Cancelación de 24 Horas):** El estudiante puede cancelar su tutoría con al menos **24 horas o más** de anticipación del inicio de la cita. Si falta menos de 24 horas, el sistema arrojará un error de dominio. Los docentes y administradores tienen permitido cancelar la tutoría en cualquier momento.
+11. **RN-11 (Trazabilidad e Historial):** Cada transición de estado (creación, confirmación, asistencia, cancelación) guarda automáticamente un registro inmutable en la colección `historial_cambios` con el autor, fecha/hora, descripción y estados involucrados.
+12. **RN-12 (Notificaciones Simuladas):** Cada evento importante inserta un registro de notificación en la base de datos simulando el envío de alertas físicas al correo institucional.
 
 ---
 
-## 5. Casos de Uso Principales
+## 5. Endpoints de la API REST
 
-1. **CU-01 Iniciar Sesión:** Validación de credenciales y rol del usuario, denegando el acceso si la cuenta está inactiva.
-2. **CU-02 Registrar Disponibilidad:** Docente publica sus bloques horarios de atención previa validación de rango y solapamiento.
-3. **CU-03 Consultar Disponibilidad:** Estudiantes buscan horarios libres filtrados por materia, docente o fecha específica.
-4. **CU-04 Agendar Tutoría:** Estudiante reserva una disponibilidad libre escribiendo un motivo (se validan límites de fecha, semana y estado del estudiante).
-5. **CU-05 Cancelar Tutoría:** Estudiante revoca una tutoría siempre y cuando cumpla la validación temporal de las 24 horas.
-6. **CU-06 Confirmar Tutoría:** Docente cambia una solicitud en estado `Pendiente` a `Confirmada`.
-7. **CU-07 Registrar Asistencia:** Docente audita la tutoría marcándola como `Asistida` o `Inasistencia` ingresando una observación obligatoria.
-8. **CU-08 Consultar Historial:** Visualización interactiva del historial de tutorías pasadas y su trazabilidad para estudiantes, docentes y administradores.
-9. **CU-09 Administrar Usuarios:** Administrador crea usuarios con perfiles extendidos de Estudiante/Docente y activa o desactiva sus cuentas.
+Los controladores REST de la capa de presentación exponen los siguientes contratos JSON estables:
 
----
+### Autenticación
+* **`POST /api/auth/login`**
+  - *Request Body:* `{"correoInstitucional": "...", "contrasena": "..."}`
+  - *Response:* Documento del usuario autenticado.
 
-## 6. Estructura del Proyecto
+### Usuarios
+* **`GET /api/usuarios`** (Permite filtro query `?rol=docente` u otros)
+* **`POST /api/usuarios`** (Crea usuario y su perfil extendido)
+* **`PUT /api/usuarios/{id}/toggle`** (Activa/Desactiva cuenta)
+* **`GET /api/estudiantes/usuario/{userId}`** (Obtiene perfil de estudiante)
+* **`GET /api/docentes/usuario/{userId}`** (Obtiene perfil de docente)
 
-Esta versión spaghetti cuenta con una arquitectura plana sumamente directa:
+### Materias
+* **`GET /api/materias`** (Lista todas las materias de la facultad)
 
-```
-Evaluacion-Sumativa-I-Parte-Practica/
-│
-├── pom.xml                                      # Configuración Maven (Spring Boot, MongoDB Starter)
-├── README.md                                    # Esta documentación completa
-│
-└── src/
-    └── main/
-        ├── java/
-        │   └── com/
-        │       └── tutorias/
-        │           └── spaghetti/
-        │               └── TutoriasSpaghettiApplication.java  # [BACKEND CENTRAL] Contiene la App, 
-        │                                                     # REST Controllers, Business Logic y Models
-        └── resources/
-            ├── application.properties           # Configuración del Puerto y Conexión de MongoDB Atlas
-            └── static/
-                └── index.html                   # [FRONTEND CENTRAL] Cliente SPA con UI Premium y Dev Toolbar
-```
+### Disponibilidad
+* **`GET /api/disponibilidades`** (Permite filtros: `?estado=Disponible&docenteId=...&materiaId=...&fecha=...`)
+* **`POST /api/disponibilidades`**
+  - *Request Body:* `{"docenteId": "...", "materiaId": "...", "fecha": "YYYY-MM-DD", "horaInicio": "HH:MM", "horaFin": "HH:MM"}`
+* **`DELETE /api/disponibilidades/{id}`** (Borra disponibilidad no reservada)
+
+### Tutorías
+* **`GET /api/tutorias`** (Filtra por `estudianteId`, `docenteId`, `estado`, y por coincidencia de nombres `estudianteNombre`, `docenteNombre` con soporte regex insesitivo)
+* **`POST /api/tutorias`** (Agenda tutoría)
+  - *Request Body:* `{"estudianteId": "...", "disponibilidadId": "...", "motivo": "..."}`
+* **`PUT /api/tutorias/{id}/status`** (Cambia el estado de la tutoría)
+  - *Request Body:* `{"nuevoEstado": "...", "observacion": "...", "usuarioResponsable": "email_de_usuario"}`
+* **`GET /api/tutorias/{id}/historial`** (Lista logs de trazabilidad)
+
+### Notificaciones
+* **`GET /api/notificaciones?destinatario={correo}`** (Lista alertas del usuario)
 
 ---
 
-## 7. Credenciales de Prueba y Datos Semilla
-El sistema cuenta con una carga automática de datos semilla en el primer arranque para facilitar las pruebas.
+## 6. Credenciales de Prueba y Datos Semilla
 
-### 7.1 Cuentas de Acceso (Contraseñas por defecto):
+Al arrancar la aplicación, se cargan por defecto los siguientes datos iniciales si la base de datos se encuentra vacía:
+
+### Cuentas de Acceso (Contraseñas por defecto):
 
 | Rol | Correo Institucional | Contraseña | Detalles |
 | :--- | :--- | :--- | :--- |
 | **Administrador** | `admin@uce.edu.ec` | `admin123` | Control de usuarios y auditoría global |
-| **Docente 1** | `docente1@uce.edu.ec` | `docente123` | Dept. Computación |
-| **Docente 2** | `docente2@uce.edu.ec` | `docente123` | Dept. Redes |
-| **Estudiante 1** | `estudiante1@uce.edu.ec` | `estudiante123` | Antony Coello (Semestre 7) |
-| **Estudiante 2** | `estudiante2@uce.edu.ec` | `estudiante123` | Juan Lopez (Semestre 7) |
-| **Estudiante Inactivo**| `inactivo@uce.edu.ec` | `inactivo123` | Cuenta bloqueada (Error al ingresar) |
+| **Docente 1** | `docente1@uce.edu.ec` | `docente123` | Carlos Perez (Dept. Computación) |
+| **Docente 2** | `docente2@uce.edu.ec` | `docente123` | Maria Flores (Dept. Redes) |
+| **Estudiante 1** | `estudiante1@uce.edu.ec` | `estudiante123` | Antony Coello (Carrera Computación, Nivel 7) |
+| **Estudiante 2** | `estudiante2@uce.edu.ec` | `estudiante123` | Juan Lopez (Carrera Computación, Nivel 7) |
+| **Estudiante Inactivo**| `inactivo@uce.edu.ec` | `inactivo123` | Cuenta suspendida |
 
-### 7.2 Materias Sembradas:
-* `AS-001` - Arquitectura de Software
-* `BD-002` - Base de Datos
-* `RC-003` - Redes de Computadoras
+### Materias:
+* `1` - `AS-001` - Arquitectura de Software
+* `2` - `BD-002` - Base de Datos
+* `3` - `RC-003` - Redes de Computadoras
 
 ---
 
-## 8. Cómo Ejecutar el Sistema Localmente
+## 7. Instrucciones para la Ejecución Local
 
 ### Requisitos Previos:
-1. **Java Development Kit (JDK) 17** o superior instalado y configurado en el PATH.
-2. **Apache Maven 3.6+** instalado y configurado en el PATH.
+1. **Java Development Kit (JDK) 17** instalado y configurado.
+2. **Apache Maven 3.6+** instalado y configurado.
 3. Una instancia de **MongoDB** activa:
-   - **Opción A (Recomendada - Atlas):** Un clúster en MongoDB Atlas.
-   - **Opción B (Local):** MongoDB ejecutándose localmente en el puerto `27017`.
+   - **Local:** MongoDB corriendo por defecto en `localhost:27017` (URI configurada en properties).
+   - **Atlas:** Si utilizas MongoDB Atlas, edita el archivo `src/main/resources/application.properties` y reemplaza la URI local con tu cadena de conexión.
 
-### Paso 1: Configurar Conexión a Base de Datos
-Abre el archivo `src/main/resources/application.properties` y configura tu URI de conexión:
-
-```properties
-# Para MongoDB Atlas:
-spring.data.mongodb.uri=mongodb+srv://<usuario>:<password>@<cluster-url>.mongodb.net/?retryWrites=true&w=majority
-spring.data.mongodb.database=tutorias_Spaghetti.db
-
-# O para MongoDB Local (Configuración por defecto):
-spring.data.mongodb.uri=mongodb://localhost:27017
-spring.data.mongodb.database=tutorias_Spaghetti.db
-```
-
-### Paso 2: Compilar y Arrancar el Servidor
-En la terminal, ubicado en la raíz del proyecto, ejecuta los siguientes comandos de Maven:
-
+### Paso 1: Compilar y Ejecutar Pruebas de Dominio
+En la terminal, ejecuta:
 ```bash
-mvn clean compile exec:java
+mvn clean test
 ```
-El servidor levantará en el puerto `8080` (definido en `application.properties`).
+Esto validará la compilación del código y ejecutará los 9 tests unitarios críticos que comprueban la regla de 24 horas y el flujo de transiciones.
 
-### Paso 3: Acceder al Sistema en el Navegador
-Abre tu navegador de preferencia e ingresa a:
+### Paso 2: Arrancar la Aplicación
+Levanta el servidor Spring Boot local en el puerto `8080` ejecutando:
+```bash
+mvn spring-boot:run
+```
+
+### Paso 3: Abrir la Interfaz de Usuario
+Abre el navegador web e ingresa a:
 ```
 http://localhost:8080/index.html
 ```
+Podrás usar la **Dev Toolbar** ubicada en la esquina inferior derecha para iniciar sesión de forma automática en cualquier perfil y realizar simulaciones de todo el flujo en capas.
 
 ---
 
-## 9. Guía de Evaluación Rápida en el Cliente Web
-Para agilizar la revisión del evaluador, se incluye una **"Dev Toolbar" (Acceso Rápido de Prueba)** flotante en la esquina inferior derecha de la pantalla:
-1. Al abrir la web verás la pantalla de inicio de sesión.
-2. Puedes escribir las credenciales manualmente o hacer **un solo clic** sobre los usuarios de la barra flotante.
-3. Al hacer clic en un usuario de prueba, el sistema inicia sesión de forma automática y carga la interfaz personalizada de su rol.
-4. **Flujo de prueba sugerido:**
-   - Inicia sesión como `estudiante1@uce.edu.ec`.
-   - Busca horarios y agenda una tutoría (utiliza las disponibilidades sembradas del 10 al 12 de junio).
-   - Haz clic en `Mis Tutorías` para ver el estado de la tutoría como `Pendiente`.
-   - Cierra sesión o usa la barra para ingresar como `docente1@uce.edu.ec`.
-   - En la pestaña `Mi Agenda` verás la solicitud del estudiante. Haz clic en `Confirmar`.
-   - Regresa al `estudiante1` y trata de cancelar la tutoría. Como la tutoría está agendada para el futuro (junio 2026, lo cual es > 24 horas a partir de hoy), el sistema te permitirá cancelarla con éxito y liberará el horario.
-   - Si creas un horario disponible para *hoy mismo* (fecha actual) e intentas cancelarlo con el estudiante, el sistema bloqueará la cancelación desplegando el error respectivo (RN-09).
-   - Entra como `admin@uce.edu.ec` para revisar la lista de usuarios y verificar los logs históricos en `Auditoría Global`.
+## 8. Resolución de Problemas Comunes (Troubleshooting)
+
+1. **Errores del IDE de Java (`enum` is a reserved keyword / The import cannot be resolved):**
+   - El código fue refactorizado para usar `com.tutorias.domain.enums` en lugar de `enum` (que es una palabra reservada en Java).
+   - Sin embargo, los IDEs a veces mantienen indexado el directorio viejo o se marean.
+   - **Solución:** Ejecuta *Maven -> Update Project* (Eclipse) o *Java: Clean Language Server Workspace* (VS Code).
+   - **Confirmación:** Siempre confía en la ejecución desde terminal (`mvn clean test`). Si en terminal compila y los tests pasan (30/30), el problema es solo del caché del IDE.
+
+2. **Error `[object Object]` o "Invalid character found in the request target" en la API:**
+   - Ocurre si previamente habías levantado la versión "Código Spaghetti" y el navegador aún conserva el objeto de sesión viejo en memoria (`sessionStorage`), el cual almacenaba el correo institucional con una estructura anidada.
+   - **Solución:** Abre la app (`http://localhost:8080`), presiona `F12`, ve a la pestaña **Application -> Session Storage**, elimínalo todo y refresca la página con `Ctrl + Shift + R` (Hard Refresh). El nuevo código gestionará correctamente la sesión.
+   - El `index.html` ha sido parcheado para detectar automáticamente esto, pero el "Hard Refresh" limpia la caché del navegador.
