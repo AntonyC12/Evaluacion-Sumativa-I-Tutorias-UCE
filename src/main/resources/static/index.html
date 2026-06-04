@@ -1,0 +1,2126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Tutorías Académicas</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --surface-color: rgba(17, 24, 39, 0.7);
+            --surface-border: rgba(255, 255, 255, 0.08);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --primary: #4facfe;
+            --primary-glow: rgba(79, 172, 254, 0.4);
+            --secondary: #00f2fe;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --font-title: 'Outfit', sans-serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 10% 20%, rgba(79, 172, 254, 0.15) 0px, transparent 50%),
+                radial-gradient(at 90% 80%, rgba(0, 242, 254, 0.1) 0px, transparent 50%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Glassmorphism Styles */
+        .glass-panel {
+            background: var(--surface-color);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--surface-border);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(79, 172, 254, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Header & Navigation */
+        header {
+            position: relative;
+            z-index: 1000;
+            width: 100%;
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--surface-border);
+            margin-bottom: 2rem;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px var(--primary-glow);
+            font-family: var(--font-title);
+            font-weight: 800;
+            color: #0b0f19;
+            font-size: 1.5rem;
+        }
+
+        .logo-text {
+            font-family: var(--font-title);
+            font-weight: 700;
+            font-size: 1.5rem;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .user-nav {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .user-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #0b0f19;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 500;
+            font-family: var(--font-body);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #0b0f19;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.25);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-success:hover {
+            background: #059669;
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+        }
+
+        .btn-link {
+            background: transparent;
+            color: var(--primary);
+            text-decoration: underline;
+            padding: 0;
+        }
+
+        /* Layout Main Containers */
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem 3rem 2rem;
+            flex: 1;
+        }
+
+        /* Auth Container & Login Screen */
+        .auth-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 70vh;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 480px;
+            padding: 2.5rem;
+            text-align: center;
+        }
+
+        .auth-title {
+            font-family: var(--font-title);
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--surface-border);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(79, 172, 254, 0.2);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            background: #0f172a;
+            border: 1px solid var(--surface-border);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Dashboard Common Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Sidebar Navigation & Info */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .sidebar-item {
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .sidebar-item.active {
+            background: rgba(79, 172, 254, 0.15);
+            color: var(--primary);
+            border-left: 4px solid var(--primary);
+        }
+
+        .sidebar-item:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+        }
+
+        /* Main Content Section */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .content-panel {
+            display: none;
+            animation: fadeIn 0.4s ease;
+            padding: 2rem;
+        }
+
+        .content-panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--surface-border);
+        }
+
+        .panel-title {
+            font-family: var(--font-title);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        /* Summary Stats Cards */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            font-family: var(--font-title);
+        }
+
+        /* Tables & Lists */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid var(--surface-border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--surface-border);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--surface-border);
+            color: var(--text-primary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .badge-confirmed {
+            background: rgba(79, 172, 254, 0.15);
+            color: var(--primary);
+            border: 1px solid rgba(79, 172, 254, 0.3);
+        }
+
+        .badge-attended {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .badge-missed {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .badge-cancelled {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-card {
+            width: 100%;
+            max-width: 550px;
+            padding: 2rem;
+            border-radius: 16px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--surface-border);
+        }
+
+        .modal-close {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            background: none;
+            border: none;
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+
+        /* Alert and Notification Messages */
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.15);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            display: block;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.15);
+            color: #6ee7b7;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            display: block;
+        }
+
+        /* Dev Helper floating toolbar */
+        .dev-toolbar {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid var(--primary);
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            max-width: 320px;
+            transition: all 0.3s ease;
+        }
+
+        .dev-toolbar-header {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dev-toolbar-toggle {
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .dev-accounts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            margin-top: 0.5rem;
+        }
+
+        .dev-account-btn {
+            font-size: 0.7rem;
+            padding: 0.3rem 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            color: var(--text-primary);
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.1s ease;
+        }
+
+        .dev-account-btn:hover {
+            border-color: var(--primary);
+            background: rgba(79, 172, 254, 0.1);
+        }
+
+        .dev-account-role {
+            font-weight: 700;
+            color: var(--secondary);
+            margin-right: 0.25rem;
+        }
+
+        /* Notifications Tray */
+        .notif-bell-container {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .notif-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
+            color: white;
+            font-size: 0.65rem;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .notif-dropdown {
+            position: absolute;
+            top: 2.5rem;
+            right: 0;
+            width: 320px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            padding: 1rem;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .notif-dropdown.active {
+            display: flex;
+        }
+
+        .notif-item {
+            padding: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.8rem;
+        }
+
+        .notif-item:last-child {
+            border-bottom: none;
+        }
+
+        .notif-title {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .notif-date {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+            background: rgba(0, 0, 0, 0.15);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .search-results {
+            margin-top: 1rem;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header (Sleek nav) -->
+    <header class="glass-panel" id="mainHeader" style="display: none;">
+        <div class="logo-container">
+            <div class="logo-icon">T</div>
+            <div class="logo-text">Tutorías UCE</div>
+        </div>
+        
+        <div class="user-nav">
+            <!-- Simulated Notification Tray -->
+            <div class="notif-bell-container" id="notifBell">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-bell"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                <span class="notif-badge" id="notifCount" style="display: none;">0</span>
+                
+                <div class="notif-dropdown glass-panel" id="notifDropdown">
+                    <h4 style="font-family: var(--font-title); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem;">Avisos Recientes</h4>
+                    <div id="notifItemsContainer">
+                        <div class="no-data">No tienes notificaciones.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Badge -->
+            <div class="user-badge" id="userBadge">
+                <div class="user-avatar" id="avatarLetter">U</div>
+                <div class="user-info">
+                    <span class="user-name" id="userNameLabel">Cargando...</span>
+                    <span class="user-role" id="userRoleLabel">Estudiante</span>
+                </div>
+            </div>
+            
+            <button class="btn btn-secondary" onclick="logout()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                Salir
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        
+        <!-- ================= AUTHENTICATION / LOGIN ================= -->
+        <div id="authContainer" class="auth-wrapper">
+            <div class="auth-card glass-panel">
+                <div class="logo-icon" style="margin: 0 auto 1.5rem auto; width: 60px; height: 60px; font-size: 2.2rem; border-radius: 15px;">T</div>
+                <h2 class="auth-title">Gestión de Tutorías</h2>
+                <p class="auth-subtitle">Ingresa con tus credenciales institucionales</p>
+                
+                <div id="loginAlertContainer"></div>
+                
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label class="form-label" for="loginEmail">Correo Institucional</label>
+                        <input type="email" id="loginEmail" class="form-input" placeholder="ejemplo@uce.edu.ec" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="loginPassword">Contraseña</label>
+                        <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 0.8rem;">
+                        Iniciar Sesión
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ================= SYSTEM DASHBOARDS ================= -->
+        <div id="dashboardContainer" class="dashboard-grid" style="display: none;">
+            
+            <!-- Sidebar (Navigation) -->
+            <div class="sidebar">
+                <div class="glass-panel" style="padding: 1.5rem;">
+                    <h3 style="font-family: var(--font-title); margin-bottom: 1.25rem; font-size: 1.1rem; color: var(--primary);">Menú Principal</h3>
+                    
+                    <!-- Student Nav -->
+                    <ul class="sidebar-menu" id="studentMenu" style="display: none;">
+                        <li class="sidebar-item active" onclick="switchTab('est-solicitar')">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                            Agendar Tutoría
+                        </li>
+                        <li class="sidebar-item" onclick="switchTab('est-tutorias')">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                            Mis Tutorías
+                        </li>
+                    </ul>
+                    
+                    <!-- Teacher Nav -->
+                    <ul class="sidebar-menu" id="teacherMenu" style="display: none;">
+                        <li class="sidebar-item active" onclick="switchTab('doc-agenda')">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                            Mi Agenda
+                        </li>
+                        <li class="sidebar-item" onclick="switchTab('doc-horarios')">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            Gestionar Horarios
+                        </li>
+                    </ul>
+
+                    <!-- Admin Nav -->
+                    <ul class="sidebar-menu" id="adminMenu" style="display: none;">
+                        <li class="sidebar-item active" onclick="switchTab('adm-usuarios')">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            Gestionar Usuarios
+                        </li>
+                        <li class="sidebar-item" onclick="switchTab('adm-auditoria')">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                            Auditoría Global
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Content panels wrapper -->
+            <div class="main-content">
+                
+                <!-- ================= ESTUDIANTE PANELS ================= -->
+                
+                <!-- Tab: Solicitar Tutoría -->
+                <div id="est-solicitar" class="content-panel active glass-panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Agendar Tutoría Académica</h2>
+                    </div>
+                    <div id="solicitarAlertContainer"></div>
+                    
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label class="form-label">Filtrar por Materia</label>
+                            <select id="filtroMateria" class="form-select" onchange="buscarDisponibilidades()">
+                                <option value="">Todas las materias</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="form-label">Filtrar por Docente</label>
+                            <select id="filtroDocente" class="form-select" onchange="buscarDisponibilidades()">
+                                <option value="">Todos los docentes</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="form-label">Fecha Específica</label>
+                            <input type="date" id="filtroFecha" class="form-input" onchange="buscarDisponibilidades()">
+                        </div>
+                    </div>
+
+                    <div class="search-results">
+                        <h3 style="margin-bottom: 1rem; font-family: var(--font-title); font-size: 1.1rem;">Horarios Disponibles de Docentes</h3>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Docente</th>
+                                        <th>Materia</th>
+                                        <th>Fecha</th>
+                                        <th>Horario</th>
+                                        <th>Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaDisponibilidades">
+                                    <tr>
+                                        <td colspan="5" class="no-data">Cargando disponibilidades...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Mis Tutorías -->
+                <div id="est-tutorias" class="content-panel glass-panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Mis Tutorías Agendadas</h2>
+                    </div>
+                    <div id="estTutoriasAlertContainer"></div>
+
+                    <div class="stats-row">
+                        <div class="stat-card glass-panel">
+                            <span class="stat-label">Futuras</span>
+                            <span class="stat-value" id="estStatFuturas" style="color: var(--primary);">0</span>
+                        </div>
+                        <div class="stat-card glass-panel">
+                            <span class="stat-label">Asistidas</span>
+                            <span class="stat-value" id="estStatAsistidas" style="color: var(--success);">0</span>
+                        </div>
+                        <div class="stat-card glass-panel">
+                            <span class="stat-label">Canceladas/Inasistidas</span>
+                            <span class="stat-value" id="estStatCanceladas" style="color: var(--danger);">0</span>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-bottom: 1rem; font-family: var(--font-title); font-size: 1.1rem;">Próximas Tutorías</h3>
+                    <div class="table-responsive" style="margin-bottom: 2rem;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Docente</th>
+                                    <th>Materia</th>
+                                    <th>Fecha / Hora</th>
+                                    <th>Motivo</th>
+                                    <th>Estado</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaEstFuturas">
+                                <tr><td colspan="6" class="no-data">Cargando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3 style="margin-bottom: 1rem; font-family: var(--font-title); font-size: 1.1rem;">Historial de Tutorías Pasadas</h3>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Docente</th>
+                                    <th>Materia</th>
+                                    <th>Fecha / Hora</th>
+                                    <th>Motivo</th>
+                                    <th>Estado</th>
+                                    <th>Observación</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaEstHistorial">
+                                <tr><td colspan="6" class="no-data">Cargando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ================= DOCENTE PANELS ================= -->
+                
+                <!-- Tab: Agenda Docente -->
+                <div id="doc-agenda" class="content-panel glass-panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Mi Agenda de Tutorías</h2>
+                    </div>
+                    <div id="docAgendaAlertContainer"></div>
+
+                    <div class="stats-row">
+                        <div class="stat-card glass-panel">
+                            <span class="stat-label">Pendientes</span>
+                            <span class="stat-value" id="docStatPendientes" style="color: var(--warning);">0</span>
+                        </div>
+                        <div class="stat-card glass-panel">
+                            <span class="stat-label">Confirmadas</span>
+                            <span class="stat-value" id="docStatConfirmadas" style="color: var(--primary);">0</span>
+                        </div>
+                        <div class="stat-card glass-panel">
+                            <span class="stat-label">Atendidas</span>
+                            <span class="stat-value" id="docStatAtendidas" style="color: var(--success);">0</span>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Estudiante</th>
+                                    <th>Materia</th>
+                                    <th>Fecha / Hora</th>
+                                    <th>Motivo</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaDocTutorias">
+                                <tr><td colspan="6" class="no-data">Cargando agenda...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tab: Gestionar Horarios Docente -->
+                <div id="doc-horarios" class="content-panel glass-panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Gestionar Mis Horarios Disponibles</h2>
+                    </div>
+                    <div id="docHorariosAlertContainer"></div>
+
+                    <div class="dashboard-grid" style="grid-template-columns: 350px 1fr;">
+                        <form id="crearDisponibilidadForm" onsubmit="guardarDisponibilidad(event)" class="glass-card" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+                            <h3 style="font-family: var(--font-title); font-size: 1.1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem;">Publicar Nuevo Horario</h3>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Materia Asignada</label>
+                                <select id="dispMateria" class="form-select" required></select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Fecha</label>
+                                <input type="date" id="dispFecha" class="form-input" required>
+                            </div>
+                            <div style="display: flex; gap: 1rem;">
+                                <div class="form-group" style="flex: 1;">
+                                    <label class="form-label">Hora Inicio</label>
+                                    <input type="time" id="dispHoraInicio" class="form-input" required>
+                                </div>
+                                <div class="form-group" style="flex: 1;">
+                                    <label class="form-label">Hora Fin</label>
+                                    <input type="time" id="dispHoraFin" class="form-input" required>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                                Publicar Disponibilidad
+                            </button>
+                        </form>
+
+                        <div>
+                            <h3 style="margin-bottom: 1rem; font-family: var(--font-title); font-size: 1.1rem;">Mis Horarios Publicados</h3>
+                            <div class="table-responsive">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Materia</th>
+                                            <th>Fecha</th>
+                                            <th>Horario</th>
+                                            <th>Estado</th>
+                                            <th>Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tablaDocHorarios">
+                                        <tr><td colspan="5" class="no-data">Cargando...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================= ADMINISTRADOR PANELS ================= -->
+                
+                <!-- Tab: Gestionar Usuarios Admin -->
+                <div id="adm-usuarios" class="content-panel glass-panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Administración de Usuarios</h2>
+                    </div>
+                    <div id="adminUsuariosAlertContainer"></div>
+
+                    <div class="dashboard-grid" style="grid-template-columns: 350px 1fr;">
+                        <form id="crearUsuarioForm" onsubmit="guardarUsuario(event)" class="glass-card" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+                            <h3 style="font-family: var(--font-title); font-size: 1.1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem;">Registrar Usuario</h3>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Nombre</label>
+                                <input type="text" id="usrNombre" class="form-input" placeholder="Nombre" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Apellido</label>
+                                <input type="text" id="usrApellido" class="form-input" placeholder="Apellido" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Correo Institucional</label>
+                                <input type="email" id="usrEmail" class="form-input" placeholder="usuario@uce.edu.ec" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Contraseña</label>
+                                <input type="password" id="usrPassword" class="form-input" placeholder="••••••••" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Rol del Usuario</label>
+                                <select id="usrRol" class="form-select" onchange="toggleAdminRolCampos()" required>
+                                    <option value="estudiante">Estudiante</option>
+                                    <option value="docente">Docente</option>
+                                    <option value="administrador">Administrador</option>
+                                </select>
+                            </div>
+
+                            <!-- Campos dinámicos según Rol -->
+                            <div id="camposEstudiante">
+                                <div class="form-group">
+                                    <label class="form-label">Carrera</label>
+                                    <input type="text" id="usrCarrera" class="form-input" value="Computación">
+                                </div>
+                                <div style="display: flex; gap: 1rem;">
+                                    <div class="form-group" style="flex: 1;">
+                                        <label class="form-label">Nivel</label>
+                                        <input type="text" id="usrNivel" class="form-input" value="7">
+                                    </div>
+                                    <div class="form-group" style="flex: 1;">
+                                        <label class="form-label">Grupo / Paralelo</label>
+                                        <input type="text" id="usrParalelo" class="form-input" value="A">
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="camposDocente" style="display: none;">
+                                <div class="form-group">
+                                    <label class="form-label">Departamento</label>
+                                    <input type="text" id="usrDepartamento" class="form-input" value="Computación">
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                                Registrar Usuario
+                            </button>
+                        </form>
+
+                        <div>
+                            <h3 style="margin-bottom: 1rem; font-family: var(--font-title); font-size: 1.1rem;">Usuarios Registrados</h3>
+                            <div class="table-responsive">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Nombre Completo</th>
+                                            <th>Correo</th>
+                                            <th>Rol</th>
+                                            <th>Estado</th>
+                                            <th>Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tablaUsuarios">
+                                        <tr><td colspan="5" class="no-data">Cargando...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Auditoría Global Admin -->
+                <div id="adm-auditoria" class="content-panel glass-panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Auditoría Global y Trazabilidad</h2>
+                    </div>
+
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label class="form-label">Estado de Tutoría</label>
+                            <select id="auditFiltroEstado" class="form-select" onchange="cargarAuditoria()">
+                                <option value="">Todos los estados</option>
+                                <option value="Pendiente">Pendiente</option>
+                                <option value="Confirmada">Confirmada</option>
+                                <option value="Asistida">Asistida</option>
+                                <option value="Inasistencia">Inasistencia</option>
+                                <option value="Cancelada">Cancelada</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="form-label">Estudiante</label>
+                            <input type="text" id="auditFiltroEstudiante" class="form-input" placeholder="Nombre estudiante..." oninput="cargarAuditoria()">
+                        </div>
+                        <div class="filter-group">
+                            <label class="form-label">Docente</label>
+                            <input type="text" id="auditFiltroDocente" class="form-input" placeholder="Nombre docente..." oninput="cargarAuditoria()">
+                        </div>
+                    </div>
+
+                    <h3 style="margin-bottom: 1rem; font-family: var(--font-title); font-size: 1.1rem;">Tutorías Registradas en el Sistema</h3>
+                    <div class="table-responsive" style="margin-bottom: 2rem;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Estudiante</th>
+                                    <th>Docente</th>
+                                    <th>Materia</th>
+                                    <th>Fecha / Hora</th>
+                                    <th>Estado Actual</th>
+                                    <th>Historial</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaAuditTutorias">
+                                <tr><td colspan="7" class="no-data">Cargando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Booking / Motivo Modal -->
+    <div class="modal-overlay" id="agendarModal">
+        <div class="modal-card glass-panel" style="background: rgba(17, 24, 39, 0.95);">
+            <div class="modal-header">
+                <h3 class="panel-title" id="agendarModalTitle">Solicitar Tutoría</h3>
+                <button class="modal-close" onclick="cerrarAgendarModal()">&times;</button>
+            </div>
+            <div id="modalAlertContainer"></div>
+            <form id="agendarForm" onsubmit="ejecutarAgendamiento(event)">
+                <input type="hidden" id="modalDispId">
+                <div class="form-group">
+                    <label class="form-label">Docente Seleccionado</label>
+                    <input type="text" id="modalDocenteNombre" class="form-input" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Materia</label>
+                    <input type="text" id="modalMateriaNombre" class="form-input" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Horario</label>
+                    <input type="text" id="modalHorarioLabel" class="form-input" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="modalMotivo">Motivo de la Tutoría</label>
+                    <textarea id="modalMotivo" class="form-input" rows="4" placeholder="Describe brevemente el tema a tratar en la tutoría académica..." required></textarea>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem;">
+                    <button type="button" class="btn btn-secondary" onclick="cerrarAgendarModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Registrar Tutoría</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- History Audit Details Modal -->
+    <div class="modal-overlay" id="detallesHistorialModal">
+        <div class="modal-card glass-panel" style="background: rgba(17, 24, 39, 0.95); max-width: 650px;">
+            <div class="modal-header">
+                <h3 class="panel-title">Trazabilidad de la Tutoría</h3>
+                <button class="modal-close" onclick="cerrarHistorialModal()">&times;</button>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha Evento</th>
+                            <th>Estado Anterior</th>
+                            <th>Estado Nuevo</th>
+                            <th>Detalle / Descripción</th>
+                            <th>Responsable</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaTrazabilidadDetalle">
+                        <tr><td colspan="5" class="no-data">Cargando trazabilidad...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+                <button type="button" class="btn btn-secondary" onclick="cerrarHistorialModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dev Helper Toolbar (Floating) -->
+    <div class="dev-toolbar" id="devToolbar">
+        <div class="dev-toolbar-header">
+            <span>Acceso Rápido de Prueba</span>
+            <span class="dev-toolbar-toggle" onclick="toggleDevToolbar()">Minimizar</span>
+        </div>
+        <div id="devToolbarContent">
+            <p style="font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 0.5rem; line-height: 1.2;">Haz clic en cualquier usuario para iniciar sesión automáticamente y probar los flujos.</p>
+            <div class="dev-accounts-list">
+                <button class="dev-account-btn" onclick="quickLogin('admin@uce.edu.ec')">
+                    <span class="dev-account-role">ADMIN</span> admin@uce.edu.ec
+                </button>
+                <button class="dev-account-btn" onclick="quickLogin('docente1@uce.edu.ec')">
+                    <span class="dev-account-role">DOCENTE 1</span> docente1@uce.edu.ec (AS)
+                </button>
+                <button class="dev-account-btn" onclick="quickLogin('docente2@uce.edu.ec')">
+                    <span class="dev-account-role">DOCENTE 2</span> docente2@uce.edu.ec (Redes)
+                </button>
+                <button class="dev-account-btn" onclick="quickLogin('estudiante1@uce.edu.ec')">
+                    <span class="dev-account-role">ESTUDIANTE 1</span> estudiante1@uce.edu.ec (Antony)
+                </button>
+                <button class="dev-account-btn" onclick="quickLogin('estudiante2@uce.edu.ec')">
+                    <span class="dev-account-role">ESTUDIANTE 2</span> estudiante2@uce.edu.ec (Juan)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Frontend logic script -->
+    <script>
+        const API_URL = '/api';
+        let currentUser = null;
+        let activeTab = '';
+        let devToolbarOpen = true;
+
+        // On Load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check session
+            const sessionData = sessionStorage.getItem('tutorias_user');
+            if (sessionData) {
+                currentUser = JSON.parse(sessionData);
+                initDashboard();
+            } else {
+                showLogin();
+            }
+
+            // Bell notification toggle
+            document.getElementById('notifBell').addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.getElementById('notifDropdown').classList.toggle('active');
+            });
+            document.addEventListener('click', () => {
+                document.getElementById('notifDropdown').classList.remove('active');
+            });
+            document.getElementById('notifDropdown').addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        });
+
+        // UI Management
+        function showLogin() {
+            document.getElementById('mainHeader').style.display = 'none';
+            document.getElementById('dashboardContainer').style.display = 'none';
+            document.getElementById('authContainer').style.display = 'flex';
+            sessionStorage.removeItem('tutorias_user');
+            currentUser = null;
+        }
+
+        function initDashboard() {
+            document.getElementById('authContainer').style.display = 'none';
+            document.getElementById('mainHeader').style.display = 'flex';
+            document.getElementById('dashboardContainer').style.display = 'grid';
+
+            // Set badge
+            document.getElementById('userNameLabel').innerText = `${currentUser.nombre} ${currentUser.apellido}`;
+            document.getElementById('userRoleLabel').innerText = currentUser.rol;
+            document.getElementById('avatarLetter').innerText = currentUser.nombre[0].toUpperCase();
+
+            // Toggle menus
+            document.getElementById('studentMenu').style.display = currentUser.rol === 'estudiante' ? 'flex' : 'none';
+            document.getElementById('teacherMenu').style.display = currentUser.rol === 'docente' ? 'flex' : 'none';
+            document.getElementById('adminMenu').style.display = currentUser.rol === 'administrador' ? 'flex' : 'none';
+
+            // Show first tab by default
+            if (currentUser.rol === 'estudiante') {
+                switchTab('est-solicitar');
+            } else if (currentUser.rol === 'docente') {
+                switchTab('doc-agenda');
+            } else if (currentUser.rol === 'administrador') {
+                switchTab('adm-usuarios');
+            }
+
+            // Start notification and data loops
+            cargarNotificaciones();
+            setInterval(cargarNotificaciones, 10000); // refresh every 10s
+        }
+
+        function switchTab(tabId) {
+            // Remove active classes
+            document.querySelectorAll('.content-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+
+            // Set active tab
+            const panel = document.getElementById(tabId);
+            if (panel) panel.classList.add('active');
+            
+            // Set active nav item
+            const navItems = document.querySelectorAll('.sidebar-item');
+            navItems.forEach(item => {
+                const onClickStr = item.getAttribute('onclick');
+                if (onClickStr && onClickStr.includes(tabId)) {
+                    item.classList.add('active');
+                }
+            });
+
+            activeTab = tabId;
+
+            // Load tab specific data
+            if (tabId === 'est-solicitar') {
+                cargarFiltrosYBuscar();
+            } else if (tabId === 'est-tutorias') {
+                cargarEstudianteTutorias();
+            } else if (tabId === 'doc-agenda') {
+                cargarDocenteAgenda();
+            } else if (tabId === 'doc-horarios') {
+                cargarDocenteHorarios();
+            } else if (tabId === 'adm-usuarios') {
+                cargarAdminUsuarios();
+                toggleAdminRolCampos();
+            } else if (tabId === 'adm-auditoria') {
+                cargarAuditoria();
+            }
+        }
+
+        // ================= API CALLS =================
+
+        // Auth
+        async function handleLogin(e) {
+            if (e) e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const alertBox = document.getElementById('loginAlertContainer');
+            
+            alertBox.innerHTML = '';
+
+            try {
+                const res = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ correoInstitucional: email, contrasena: password })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.message || 'Error al iniciar sesión');
+                }
+
+                sessionStorage.setItem('tutorias_user', JSON.stringify(data));
+                currentUser = data;
+                initDashboard();
+            } catch (err) {
+                alertBox.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+            }
+        }
+
+        function quickLogin(email) {
+            document.getElementById('loginEmail').value = email;
+            document.getElementById('loginPassword').value = 'admin123'; // all seed passwords match
+            if (email.startsWith('docente')) document.getElementById('loginPassword').value = 'docente123';
+            if (email.startsWith('estudiante')) document.getElementById('loginPassword').value = 'estudiante123';
+            
+            handleLogin();
+        }
+
+        function logout() {
+            showLogin();
+        }
+
+        function toggleDevToolbar() {
+            const content = document.getElementById('devToolbarContent');
+            const toggle = document.querySelector('.dev-toolbar-toggle');
+            if (devToolbarOpen) {
+                content.style.display = 'none';
+                toggle.innerText = 'Expandir';
+            } else {
+                content.style.display = 'block';
+                toggle.innerText = 'Minimizar';
+            }
+            devToolbarOpen = !devToolbarOpen;
+        }
+
+        // Notifications
+        async function cargarNotificaciones() {
+            if (!currentUser) return;
+            try {
+                const res = await fetch(`${API_URL}/notificaciones?destinatario=${currentUser.correoInstitucional}`);
+                if (!res.ok) return;
+                const data = await res.json();
+                
+                const countBadge = document.getElementById('notifCount');
+                const container = document.getElementById('notifItemsContainer');
+                
+                if (data.length > 0) {
+                    countBadge.innerText = data.length;
+                    countBadge.style.display = 'flex';
+                    
+                    container.innerHTML = data.slice().reverse().map(n => `
+                        <div class="notif-item">
+                            <div class="notif-title">
+                                <span>Aviso de Tutoría</span>
+                                <span class="notif-date">${n.fechaEnvio ? n.fechaEnvio.split(' ')[1] || '' : ''}</span>
+                            </div>
+                            <p style="color: var(--text-primary);">${n.mensaje}</p>
+                            <span style="font-size: 0.65rem; color: var(--text-secondary);">Destino: ${n.destinatario} | ${n.estadoEnvio}</span>
+                        </div>
+                    `).join('');
+                } else {
+                    countBadge.style.display = 'none';
+                    container.innerHTML = '<div class="no-data">No tienes notificaciones.</div>';
+                }
+            } catch (err) {
+                console.error("Error cargando notificaciones", err);
+            }
+        }
+
+        // ================= ESTUDIANTE CONTROLLERS =================
+        async function cargarFiltrosYBuscar() {
+            try {
+                // Materias
+                const resMat = await fetch(`${API_URL}/materias`);
+                const materias = await resMat.json();
+                const selMat = document.getElementById('filtroMateria');
+                selMat.innerHTML = '<option value="">Todas las materias</option>';
+                materias.forEach(m => {
+                    if (m.estado === 'Activo') {
+                        selMat.innerHTML += `<option value="${m.id}">${m.nombre} (${m.codigo})</option>`;
+                    }
+                });
+
+                // Docentes
+                const resDoc = await fetch(`${API_URL}/usuarios?rol=docente`);
+                const docentes = await resDoc.json();
+                const selDoc = document.getElementById('filtroDocente');
+                selDoc.innerHTML = '<option value="">Todos los docentes</option>';
+                docentes.forEach(d => {
+                    if (d.estado === 'Activo') {
+                        selDoc.innerHTML += `<option value="${d.id}">${d.nombre} ${d.apellido}</option>`;
+                    }
+                });
+
+                buscarDisponibilidades();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function buscarDisponibilidades() {
+            const materiaId = document.getElementById('filtroMateria').value;
+            const docenteId = document.getElementById('filtroDocente').value;
+            const fecha = document.getElementById('filtroFecha').value;
+            const tbody = document.getElementById('tablaDisponibilidades');
+
+            try {
+                let url = `${API_URL}/disponibilidades?estado=Disponible`;
+                if (materiaId) url += `&materiaId=${materiaId}`;
+                if (docenteId) url += `&docenteId=${docenteId}`;
+                if (fecha) url += `&fecha=${fecha}`;
+
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="no-data">No hay horarios disponibles publicados que coincidan con los filtros.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = data.map(d => `
+                    <tr class="glass-card">
+                        <td style="font-weight: 600;">Doc. ${d.docenteNombre}</td>
+                        <td>${d.materiaNombre}</td>
+                        <td>${d.fecha}</td>
+                        <td><span style="color: var(--secondary); font-weight: 600;">${d.horaInicio} - ${d.horaFin}</span></td>
+                        <td>
+                            <button class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="abrirAgendarModal('${d.id}', '${d.docenteNombre}', '${d.materiaNombre}', '${d.fecha}', '${d.horaInicio}', '${d.horaFin}')">
+                                Reservar
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="5" class="no-data" style="color: var(--danger);">Error al cargar: ${err.message}</td></tr>`;
+            }
+        }
+
+        function abrirAgendarModal(id, docNombre, matNombre, fecha, horaIni, horaFin) {
+            document.getElementById('modalDispId').value = id;
+            document.getElementById('modalDocenteNombre').value = `Doc. ${docNombre}`;
+            document.getElementById('modalMateriaNombre').value = matNombre;
+            document.getElementById('modalHorarioLabel').value = `${fecha} / de ${horaIni} a ${horaFin}`;
+            document.getElementById('modalMotivo').value = '';
+            document.getElementById('modalAlertContainer').innerHTML = '';
+            document.getElementById('agendarModal').classList.add('active');
+        }
+
+        function cerrarAgendarModal() {
+            document.getElementById('agendarModal').classList.remove('active');
+        }
+
+        async function ejecutarAgendamiento(e) {
+            e.preventDefault();
+            const dispId = document.getElementById('modalDispId').value;
+            const motivo = document.getElementById('modalMotivo').value;
+            const modalAlert = document.getElementById('modalAlertContainer');
+            const alertMain = document.getElementById('solicitarAlertContainer');
+
+            modalAlert.innerHTML = '';
+            alertMain.innerHTML = '';
+
+            try {
+                // find student id from our user object
+                const estRes = await fetch(`${API_URL}/estudiantes/usuario/${currentUser.id}`);
+                if (!estRes.ok) throw new Error("No se pudo identificar tu perfil de estudiante");
+                const estudiante = await estRes.json();
+
+                const res = await fetch(`${API_URL}/tutorias`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        estudianteId: estudiante.id,
+                        disponibilidadId: dispId,
+                        motivo: motivo
+                    })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.message || 'No cumple reglas de negocio');
+                }
+
+                alertMain.innerHTML = `<div class="alert alert-success">Tutoría agendada con éxito. Se ha enviado notificación al correo del estudiante.</div>`;
+                cerrarAgendarModal();
+                buscarDisponibilidades();
+                cargarNotificaciones();
+            } catch (err) {
+                modalAlert.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+            }
+        }
+
+        async function cargarEstudianteTutorias() {
+            const tableFuturas = document.getElementById('tablaEstFuturas');
+            const tableHistorial = document.getElementById('tablaEstHistorial');
+            const alertContainer = document.getElementById('estTutoriasAlertContainer');
+            alertContainer.innerHTML = '';
+
+            try {
+                const estRes = await fetch(`${API_URL}/estudiantes/usuario/${currentUser.id}`);
+                if (!estRes.ok) throw new Error("No se pudo obtener el perfil de estudiante");
+                const estudiante = await estRes.json();
+
+                const res = await fetch(`${API_URL}/tutorias?estudianteId=${estudiante.id}`);
+                const tutorias = await res.json();
+
+                // Sort tutorias
+                const futuras = tutorias.filter(t => t.estado === 'Pendiente' || t.estado === 'Confirmada');
+                const pasadas = tutorias.filter(t => t.estado === 'Asistida' || t.estado === 'Inasistencia' || t.estado === 'Cancelada');
+
+                // Update Stats
+                document.getElementById('estStatFuturas').innerText = futuras.length;
+                document.getElementById('estStatAsistidas').innerText = tutorias.filter(t => t.estado === 'Asistida').length;
+                document.getElementById('estStatCanceladas').innerText = tutorias.filter(t => t.estado === 'Cancelada' || t.estado === 'Inasistencia').length;
+
+                // Render Futuras
+                if (futuras.length === 0) {
+                    tableFuturas.innerHTML = '<tr><td colspan="6" class="no-data">No tienes tutorías pendientes o confirmadas.</td></tr>';
+                } else {
+                    tableFuturas.innerHTML = futuras.map(t => {
+                        return `
+                            <tr>
+                                <td style="font-weight: 600;">Doc. ${t.docenteNombre}</td>
+                                <td>${t.materiaNombre}</td>
+                                <td><span style="color: var(--secondary);">${t.fechaHoraInicio.split(' ')[0]}</span> <span style="font-size: 0.8rem; color: var(--text-secondary);">${t.fechaHoraInicio.split(' ')[1]}</span></td>
+                                <td>${t.motivo}</td>
+                                <td><span class="badge ${t.estado === 'Confirmada' ? 'badge-confirmed' : 'badge-pending'}">${t.estado}</span></td>
+                                <td>
+                                    <button class="btn btn-danger" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;" onclick="cancelarTutoriaEstudiante('${t.id}')">
+                                        Cancelar
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+
+                // Render Pasadas
+                if (pasadas.length === 0) {
+                    tableHistorial.innerHTML = '<tr><td colspan="6" class="no-data">No hay historial de tutorías.</td></tr>';
+                } else {
+                    tableHistorial.innerHTML = pasadas.map(t => {
+                        let badgeClass = 'badge-cancelled';
+                        if (t.estado === 'Asistida') badgeClass = 'badge-attended';
+                        if (t.estado === 'Inasistencia') badgeClass = 'badge-missed';
+
+                        return `
+                            <tr>
+                                <td style="font-weight: 600;">Doc. ${t.docenteNombre}</td>
+                                <td>${t.materiaNombre}</td>
+                                <td><span>${t.fechaHoraInicio.split(' ')[0]}</span> <span style="font-size: 0.8rem; color: var(--text-secondary);">${t.fechaHoraInicio.split(' ')[1]}</span></td>
+                                <td>${t.motivo}</td>
+                                <td><span class="badge ${badgeClass}">${t.estado}</span></td>
+                                <td><span style="font-size: 0.85rem; color: var(--text-secondary);">${t.observacion || '-'}</span></td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+
+            } catch (err) {
+                alertContainer.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+            }
+        }
+
+        async function cancelarTutoriaEstudiante(id) {
+            const alertContainer = document.getElementById('estTutoriasAlertContainer');
+            alertContainer.innerHTML = '';
+
+            if (!confirm('¿Estás seguro de que deseas cancelar esta tutoría? (Recuerda que solo es permitido con 24 horas de anticipación)')) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/tutorias/${id}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nuevoEstado: 'Cancelada',
+                        observacion: 'Cancelado por el estudiante',
+                        usuarioResponsable: currentUser.correoInstitucional
+                    })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.message || 'Error al cancelar tutoría');
+                }
+
+                alertContainer.innerHTML = `<div class="alert alert-success">Tutoría cancelada correctamente. Se ha notificado al estudiante y docente.</div>`;
+                cargarEstudianteTutorias();
+                cargarNotificaciones();
+            } catch (err) {
+                alertContainer.innerHTML = `<div class="alert alert-danger" style="display: block;">No se puede cancelar: ${err.message}</div>`;
+            }
+        }
+
+
+        // ================= DOCENTE CONTROLLERS =================
+        async function cargarDocenteAgenda() {
+            const table = document.getElementById('tablaDocTutorias');
+            const alertContainer = document.getElementById('docAgendaAlertContainer');
+            alertContainer.innerHTML = '';
+
+            try {
+                const docRes = await fetch(`${API_URL}/docentes/usuario/${currentUser.id}`);
+                if (!docRes.ok) throw new Error("No se pudo obtener el perfil de docente");
+                const docente = await docRes.json();
+
+                const res = await fetch(`${API_URL}/tutorias?docenteId=${docente.id}`);
+                const data = await res.json();
+
+                // Stats
+                document.getElementById('docStatPendientes').innerText = data.filter(t => t.estado === 'Pendiente').length;
+                document.getElementById('docStatConfirmadas').innerText = data.filter(t => t.estado === 'Confirmada').length;
+                document.getElementById('docStatAtendidas').innerText = data.filter(t => t.estado === 'Asistida').length;
+
+                if (data.length === 0) {
+                    table.innerHTML = '<tr><td colspan="6" class="no-data">No tienes tutorías registradas en tu agenda.</td></tr>';
+                    return;
+                }
+
+                table.innerHTML = data.map(t => {
+                    let badgeClass = 'badge-pending';
+                    if (t.estado === 'Confirmada') badgeClass = 'badge-confirmed';
+                    if (t.estado === 'Asistida') badgeClass = 'badge-attended';
+                    if (t.estado === 'Inasistencia') badgeClass = 'badge-missed';
+                    if (t.estado === 'Cancelada') badgeClass = 'badge-cancelled';
+
+                    let actions = '-';
+                    if (t.estado === 'Pendiente') {
+                        actions = `
+                            <button class="btn btn-success" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;" onclick="cambiarEstadoTutoriaDocente('${t.id}', 'Confirmada', 'Tutoría confirmada por el docente')">
+                                Confirmar
+                            </button>
+                            <button class="btn btn-danger" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;" onclick="cambiarEstadoTutoriaDocente('${t.id}', 'Cancelada', 'Cancelado por el docente')">
+                                Cancelar
+                            </button>
+                        `;
+                    } else if (t.estado === 'Confirmada') {
+                        actions = `
+                            <button class="btn btn-success" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;" onclick="cambiarEstadoTutoriaDocente('${t.id}', 'Asistida', 'Asistió puntualmente')">
+                                Registrar Asistencia
+                            </button>
+                            <button class="btn btn-danger" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;" onclick="cambiarEstadoTutoriaDocente('${t.id}', 'Inasistencia', 'El estudiante no asistió')">
+                                Inasistencia
+                            </button>
+                        `;
+                    }
+
+                    return `
+                        <tr>
+                            <td style="font-weight: 600;">${t.estudianteNombre}</td>
+                            <td>${t.materiaNombre}</td>
+                            <td><span>${t.fechaHoraInicio.split(' ')[0]}</span> <span style="font-size: 0.8rem; color: var(--text-secondary);">${t.fechaHoraInicio.split(' ')[1]}</span></td>
+                            <td>${t.motivo}</td>
+                            <td><span class="badge ${badgeClass}">${t.estado}</span></td>
+                            <td><div style="display: flex; gap: 0.4rem; justify-content: center;">${actions}</div></td>
+                        </tr>
+                    `;
+                }).join('');
+
+            } catch (err) {
+                alertContainer.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+            }
+        }
+
+        async function cambiarEstadoTutoriaDocente(id, nuevoEstado, defaultObservacion) {
+            const observacion = prompt('Ingresa una observación para el cambio de estado:', defaultObservacion);
+            if (observacion === null) return;
+
+            try {
+                const res = await fetch(`${API_URL}/tutorias/${id}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nuevoEstado: nuevoEstado,
+                        observacion: observacion,
+                        usuarioResponsable: currentUser.correoInstitucional
+                    })
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || 'Error en la transición de estado');
+
+                cargarDocenteAgenda();
+                cargarNotificaciones();
+            } catch (err) {
+                alert(err.message);
+            }
+        }
+
+        async function cargarDocenteHorarios() {
+            const selMat = document.getElementById('dispMateria');
+            const table = document.getElementById('tablaDocHorarios');
+            const alertContainer = document.getElementById('docHorariosAlertContainer');
+            
+            try {
+                // Load materias
+                const resMat = await fetch(`${API_URL}/materias`);
+                const materias = await resMat.json();
+                selMat.innerHTML = '';
+                materias.forEach(m => {
+                    if (m.estado === 'Activo') {
+                        selMat.innerHTML += `<option value="${m.id}">${m.nombre}</option>`;
+                    }
+                });
+
+                // Load docente
+                const docRes = await fetch(`${API_URL}/docentes/usuario/${currentUser.id}`);
+                if (!docRes.ok) throw new Error("No se pudo obtener el perfil de docente");
+                const docente = await docRes.json();
+
+                // Load availabilities
+                const resDisp = await fetch(`${API_URL}/disponibilidades?docenteId=${docente.id}`);
+                const data = await resDisp.json();
+
+                if (data.length === 0) {
+                    table.innerHTML = '<tr><td colspan="5" class="no-data">No has publicado disponibilidades.</td></tr>';
+                    return;
+                }
+
+                table.innerHTML = data.map(d => {
+                    let btnEliminar = '';
+                    if (d.estado === 'Disponible') {
+                        btnEliminar = `<button class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="eliminarDisponibilidad('${d.id}')">Eliminar</button>`;
+                    } else {
+                        btnEliminar = `<span style="font-size: 0.8rem; color: var(--text-secondary);">Reservado</span>`;
+                    }
+
+                    return `
+                        <tr>
+                            <td style="font-weight: 600;">${d.materiaNombre}</td>
+                            <td>${d.fecha}</td>
+                            <td><span style="color: var(--primary); font-weight: 600;">${d.horaInicio} - ${d.horaFin}</span></td>
+                            <td><span class="badge ${d.estado === 'Disponible' ? 'badge-attended' : 'badge-confirmed'}">${d.estado}</span></td>
+                            <td>${btnEliminar}</td>
+                        </tr>
+                    `;
+                }).join('');
+
+            } catch (err) {
+                alertContainer.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+            }
+        }
+
+        async function guardarDisponibilidad(e) {
+            e.preventDefault();
+            const materiaId = document.getElementById('dispMateria').value;
+            const fecha = document.getElementById('dispFecha').value;
+            const horaInicio = document.getElementById('dispHoraInicio').value;
+            const horaFin = document.getElementById('dispHoraFin').value;
+            const alertContainer = document.getElementById('docHorariosAlertContainer');
+            alertContainer.innerHTML = '';
+
+            try {
+                const docRes = await fetch(`${API_URL}/docentes/usuario/${currentUser.id}`);
+                if (!docRes.ok) throw new Error("No se pudo identificar tu perfil de docente");
+                const docente = await docRes.json();
+
+                const res = await fetch(`${API_URL}/disponibilidades`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        docenteId: docente.id,
+                        materiaId: materiaId,
+                        fecha: fecha,
+                        horaInicio: horaInicio,
+                        horaFin: horaFin,
+                        estado: 'Disponible'
+                    })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.message || 'Error al guardar disponibilidad');
+                }
+
+                alertContainer.innerHTML = `<div class="alert alert-success">Disponibilidad publicada con éxito.</div>`;
+                cargarDocenteHorarios();
+                document.getElementById('crearDisponibilidadForm').reset();
+            } catch (err) {
+                alertContainer.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+            }
+        }
+
+        async function eliminarDisponibilidad(id) {
+            if (!confirm('¿Estás seguro de eliminar este horario?')) return;
+            const alertContainer = document.getElementById('docHorariosAlertContainer');
+            alertContainer.innerHTML = '';
+
+            try {
+                const res = await fetch(`${API_URL}/disponibilidades/${id}`, {
+                    method: 'DELETE'
+                });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.message || 'Error al eliminar disponibilidad');
+                }
+
+                alertContainer.innerHTML = `<div class="alert alert-success">Disponibilidad eliminada correctamente.</div>`;
+                cargarDocenteHorarios();
+            } catch (err) {
+                alertContainer.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+            }
+        }
+
+
+        // ================= ADMINISTRADOR CONTROLLERS =================
+        async function cargarAdminUsuarios() {
+            const table = document.getElementById('tablaUsuarios');
+            const alertContainer = document.getElementById('adminUsuariosAlertContainer');
+            alertContainer.innerHTML = '';
+
+            try {
+                const res = await fetch(`${API_URL}/usuarios`);
+                const data = await res.json();
+
+                table.innerHTML = data.map(u => {
+                    const btnToggle = `
+                        <button class="btn ${u.estado === 'Activo' ? 'btn-danger' : 'btn-success'}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="toggleUsuarioEstado('${u.id}')">
+                            ${u.estado === 'Activo' ? 'Desactivar' : 'Activar'}
+                        </button>
+                    `;
+
+                    return `
+                        <tr>
+                            <td style="font-weight: 600;">${u.nombre} ${u.apellido}</td>
+                            <td>${u.correoInstitucional}</td>
+                            <td><span style="font-weight: 500; text-transform: capitalize;">${u.rol}</span></td>
+                            <td><span class="badge ${u.estado === 'Activo' ? 'badge-attended' : 'badge-missed'}">${u.estado}</span></td>
+                            <td>${btnToggle}</td>
+                        </tr>
+                    `;
+                }).join('');
+
+            } catch (err) {
+                table.innerHTML = `<tr><td colspan="5" class="no-data" style="color: var(--danger);">Error: ${err.message}</td></tr>`;
+            }
+        }
+
+        function toggleAdminRolCampos() {
+            const rol = document.getElementById('usrRol').value;
+            const camposEst = document.getElementById('camposEstudiante');
+            const camposDoc = document.getElementById('camposDocente');
+
+            if (rol === 'estudiante') {
+                camposEst.style.display = 'block';
+                camposDoc.style.display = 'none';
+            } else if (rol === 'docente') {
+                camposEst.style.display = 'none';
+                camposDoc.style.display = 'block';
+            } else {
+                camposEst.style.display = 'none';
+                camposDoc.style.display = 'none';
+            }
+        }
+
+        async function guardarUsuario(e) {
+            e.preventDefault();
+            const alertContainer = document.getElementById('adminUsuariosAlertContainer');
+            alertContainer.innerHTML = '';
+
+            const nombre = document.getElementById('usrNombre').value;
+            const apellido = document.getElementById('usrApellido').value;
+            const correo = document.getElementById('usrEmail').value;
+            const contrasena = document.getElementById('usrPassword').value;
+            const rol = document.getElementById('usrRol').value;
+
+            // Extra fields
+            const carrera = document.getElementById('usrCarrera').value;
+            const nivel = document.getElementById('usrNivel').value;
+            const paralelo = document.getElementById('usrParalelo').value;
+            const departamento = document.getElementById('usrDepartamento').value;
+
+            try {
+                const res = await fetch(`${API_URL}/usuarios`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nombre, apellido, correoInstitucional: correo, contrasena, rol, estado: 'Activo',
+                        carrera, nivel, paralelo, departamento
+                    })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.message || 'Error al crear usuario');
+                }
+
+                alertContainer.innerHTML = `<div class="alert alert-success">Usuario registrado exitosamente.</div>`;
+                cargarAdminUsuarios();
+                document.getElementById('crearUsuarioForm').reset();
+                toggleAdminRolCampos();
+            } catch (err) {
+                alertContainer.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+            }
+        }
+
+        async function toggleUsuarioEstado(id) {
+            try {
+                const res = await fetch(`${API_URL}/usuarios/${id}/toggle`, {
+                    method: 'PUT'
+                });
+                const data = await res.json();
+
+                if (!res.ok) throw new Error(data.message || 'Error al cambiar estado');
+
+                cargarAdminUsuarios();
+            } catch (err) {
+                alert(err.message);
+            }
+        }
+
+        // Auditoría
+        async function cargarAuditoria() {
+            const state = document.getElementById('auditFiltroEstado').value;
+            const estName = document.getElementById('auditFiltroEstudiante').value;
+            const docName = document.getElementById('auditFiltroDocente').value;
+            const table = document.getElementById('tablaAuditTutorias');
+
+            try {
+                let url = `${API_URL}/tutorias?all=true`;
+                if (state) url += `&estado=${state}`;
+                if (estName) url += `&estudianteNombre=${estName}`;
+                if (docName) url += `&docenteNombre=${docName}`;
+
+                const res = await fetch(url);
+                const tutorias = await res.json();
+
+                if (tutorias.length === 0) {
+                    table.innerHTML = '<tr><td colspan="7" class="no-data">No hay tutorías registradas.</td></tr>';
+                    return;
+                }
+
+                table.innerHTML = tutorias.map(t => {
+                    let badgeClass = 'badge-pending';
+                    if (t.estado === 'Confirmada') badgeClass = 'badge-confirmed';
+                    if (t.estado === 'Asistida') badgeClass = 'badge-attended';
+                    if (t.estado === 'Inasistencia') badgeClass = 'badge-missed';
+                    if (t.estado === 'Cancelada') badgeClass = 'badge-cancelled';
+
+                    return `
+                        <tr>
+                            <td><span style="font-family: monospace; font-size: 0.75rem;">${t.id.slice(-6)}</span></td>
+                            <td style="font-weight: 500;">${t.estudianteNombre}</td>
+                            <td style="font-weight: 500;">Doc. ${t.docenteNombre}</td>
+                            <td>${t.materiaNombre}</td>
+                            <td><span>${t.fechaHoraInicio.split(' ')[0]}</span> <span style="font-size: 0.8rem; color: var(--text-secondary);">${t.fechaHoraInicio.split(' ')[1]}</span></td>
+                            <td><span class="badge ${badgeClass}">${t.estado}</span></td>
+                            <td>
+                                <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="verTrazabilidad('${t.id}')">
+                                    Historial
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+            } catch (err) {
+                table.innerHTML = `<tr><td colspan="7" class="no-data" style="color: var(--danger);">Error: ${err.message}</td></tr>`;
+            }
+        }
+
+        async function verTrazabilidad(tutoriaId) {
+            const table = document.getElementById('tablaTrazabilidadDetalle');
+            document.getElementById('detallesHistorialModal').classList.add('active');
+            table.innerHTML = '<tr><td colspan="5" class="no-data">Cargando trazabilidad...</td></tr>';
+
+            try {
+                const res = await fetch(`${API_URL}/tutorias/${tutoriaId}/historial`);
+                const data = await res.json();
+
+                if (data.length === 0) {
+                    table.innerHTML = '<tr><td colspan="5" class="no-data">Sin historial de cambios para esta tutoría.</td></tr>';
+                    return;
+                }
+
+                table.innerHTML = data.map(h => `
+                    <tr>
+                        <td style="font-size: 0.8rem;">${h.fechaEvento}</td>
+                        <td><span class="badge ${h.estadoAnterior ? 'badge-cancelled' : ''}">${h.estadoAnterior || '-'}</span></td>
+                        <td><span class="badge badge-confirmed">${h.estadoNuevo}</span></td>
+                        <td style="font-size: 0.85rem; color: var(--text-secondary);">${h.descripcion}</td>
+                        <td style="font-weight: 600; font-size: 0.8rem;">${h.usuarioResponsable}</td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                table.innerHTML = `<tr><td colspan="5" class="no-data" style="color: var(--danger);">Error: ${err.message}</td></tr>`;
+            }
+        }
+
+        function cerrarHistorialModal() {
+            document.getElementById('detallesHistorialModal').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
