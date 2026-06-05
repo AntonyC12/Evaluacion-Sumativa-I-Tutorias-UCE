@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Tutorías Académicas - UCE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --accent: #d946ef;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        header {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--card-border);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-area h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #818cf8, #e0f2fe, #d946ef);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .user-selector {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-selector select {
+            background: rgba(15, 23, 42, 0.8);
+            color: var(--text-main);
+            border: 1px solid var(--card-border);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .user-selector select:focus {
+            border-color: var(--primary);
+        }
+
+        .badge {
+            background: rgba(99, 102, 241, 0.2);
+            color: #a5b4fc;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 1024px) {
+            main {
+                grid-template-columns: 350px 1fr;
+            }
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 0.6rem 0.8rem;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 0.7rem 1.2rem;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.45);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            width: auto;
+        }
+
+        .alert {
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #6ee7b7;
+        }
+
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 0.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        th {
+            color: var(--text-muted);
+            font-weight: 600;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            vertical-align: middle;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .status-pill {
+            display: inline-flex;
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pendiente { background: rgba(245, 158, 11, 0.15); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .status-confirmada { background: rgba(99, 102, 241, 0.15); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.3); }
+        .status-asistida { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .status-inasistencia { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .status-cancelada { background: rgba(255, 255, 255, 0.08); color: var(--text-muted); border: 1px solid rgba(255, 255, 255, 0.15); }
+
+        .role-panel {
+            display: none;
+        }
+
+        .role-panel.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .flex-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .availabilities-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .availabilities-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .availability-card {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .availability-info div {
+            margin-bottom: 0.25rem;
+        }
+
+        .availability-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--card-border);
+            margin-top: auto;
+            background: rgba(15, 23, 42, 0.4);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-area">
+            <h1>UCE Tutorías DDD</h1>
+        </div>
+        <div class="user-selector">
+            <span class="badge" id="active-user-role-badge">Estudiante</span>
+            <select id="user-role-select" onchange="switchUser()">
+                <option value="estudiante">Estudiante: Juan Perez (estudiante@uce.edu.ec)</option>
+                <option value="docente">Docente: Dr. Javier Gomez (docente@uce.edu.ec)</option>
+                <option value="admin">Administrador (Ver Todo)</option>
+            </select>
+        </div>
+    </header>
+
+    <main>
+        <!-- Columna de Formularios y Acciones -->
+        <div class="sidebar">
+            <div class="glass-card">
+                <div id="alert-box" class="alert"></div>
+
+                <!-- PANEL ESTUDIANTE -->
+                <div id="panel-estudiante" class="role-panel active">
+                    <h3 class="card-title">Agendar Tutoría</h3>
+                    <form id="agendar-form" onsubmit="agendarTutoria(event)">
+                        <div class="form-group">
+                            <label for="agenda-estudiante-id">Estudiante ID</label>
+                            <input type="text" id="agenda-estudiante-id" value="est1" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="agenda-disponibilidad">Seleccionar Disponibilidad</label>
+                            <select id="agenda-disponibilidad" required onchange="onDisponibilidadSelect()">
+                                <option value="">Cargando disponibilidades...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="agenda-docente-id">Docente ID</label>
+                            <input type="text" id="agenda-docente-id" readonly required>
+                        </div>
+                        <div class="form-group">
+                            <label for="agenda-materia-id">Materia ID</label>
+                            <input type="text" id="agenda-materia-id" readonly required>
+                        </div>
+                        <div class="form-group">
+                            <label for="agenda-inicio">Hora Inicio</label>
+                            <input type="text" id="agenda-inicio" readonly required>
+                        </div>
+                        <div class="form-group">
+                            <label for="agenda-fin">Hora Fin</label>
+                            <input type="text" id="agenda-fin" readonly required>
+                        </div>
+                        <div class="form-group">
+                            <label for="agenda-motivo">Motivo de la Tutoría</label>
+                            <textarea id="agenda-motivo" rows="3" placeholder="Ej. Dudas sobre transacciones de JPA" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Agendar Tutoría</button>
+                    </form>
+                </div>
+
+                <!-- PANEL DOCENTE -->
+                <div id="panel-docente" class="role-panel">
+                    <h3 class="card-title">Registrar Disponibilidad</h3>
+                    <form id="disponibilidad-form" onsubmit="registrarDisponibilidad(event)">
+                        <div class="form-group">
+                            <label for="disp-docente-id">Docente ID</label>
+                            <input type="text" id="disp-docente-id" value="doc1" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="disp-materia">Materia</label>
+                            <select id="disp-materia" required>
+                                <option value="">Cargando materias...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="disp-fecha">Fecha</label>
+                            <input type="date" id="disp-fecha" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="disp-hora-inicio">Hora Inicio</label>
+                            <input type="time" id="disp-hora-inicio" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="disp-hora-fin">Hora Fin</label>
+                            <input type="time" id="disp-hora-fin" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Crear Disponibilidad</button>
+                    </form>
+                </div>
+
+                <!-- PANEL ADMIN -->
+                <div id="panel-admin" class="role-panel">
+                    <h3 class="card-title">Registrar Usuario</h3>
+                    <form id="usuario-form" onsubmit="registrarUsuario(event)">
+                        <div class="form-group">
+                            <label for="usr-correo">Correo Electrónico</label>
+                            <input type="email" id="usr-correo" placeholder="ejemplo@uce.edu.ec" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="usr-rol">Rol</label>
+                            <select id="usr-rol" required>
+                                <option value="ESTUDIANTE">Estudiante</option>
+                                <option value="DOCENTE">Docente</option>
+                                <option value="ADMINISTRADOR">Administrador</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Crear Usuario</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna de Contenido Principal -->
+        <div class="main-content">
+            <!-- Sección de Disponibilidades -->
+            <div class="glass-card">
+                <h3 class="card-title">Agenda de Disponibilidades Docente</h3>
+                <div class="availabilities-grid" id="availabilities-list">
+                    <!-- Dinámico -->
+                </div>
+            </div>
+
+            <!-- Sección de Tutorías -->
+            <div class="glass-card">
+                <h3 class="card-title">Historial de Tutorías del Sistema</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Estudiante</th>
+                                <th>Docente</th>
+                                <th>Materia</th>
+                                <th>Horario</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tutorias-table-body">
+                            <!-- Dinámico -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>Universidad Central del Ecuador &copy; 2026. Evaluacion Sumativa I - Arquitectura de Software (Rama Enfoque-DDD).</p>
+    </footer>
+
+    <script>
+        // Variables globales
+        let users = [];
+        let materias = [];
+        let disponibilidades = [];
+        let tutorias = [];
+
+        // Inicializar datos en la carga
+        window.addEventListener('DOMContentLoaded', () => {
+            // Establecer fecha de disponibilidad por defecto a mañana
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.getElementById('disp-fecha').value = tomorrow.toISOString().split('T')[0];
+
+            fetchData();
+        });
+
+        // Carga de catálogos y listas
+        async function fetchData() {
+            try {
+                await Promise.all([
+                    fetchUsuarios(),
+                    fetchMaterias(),
+                    fetchDisponibilidades(),
+                    fetchTutorias()
+                ]);
+            } catch (error) {
+                showAlert('Error cargando los datos iniciales del backend.', 'danger');
+            }
+        }
+
+        async function fetchUsuarios() {
+            const res = await fetch('/api/usuarios');
+            users = await res.json();
+        }
+
+        async function fetchMaterias() {
+            const res = await fetch('/api/materias');
+            materias = await res.json();
+            
+            // Llenar select de materias
+            const select = document.getElementById('disp-materia');
+            select.innerHTML = materias.map(m => `<option value="${m.id}">${m.nombre}</option>`).join('');
+        }
+
+        async function fetchDisponibilidades() {
+            const res = await fetch('/api/disponibilidades');
+            disponibilidades = await res.json();
+            
+            renderDisponibilidades();
+            populateAgendaDisponibilidades();
+        }
+
+        async function fetchTutorias() {
+            const res = await fetch('/api/tutorias');
+            tutorias = await res.json();
+            renderTutorias();
+        }
+
+        // Cambio de rol en la UI
+        function switchUser() {
+            const role = document.getElementById('user-role-select').value;
+            const badge = document.getElementById('active-user-role-badge');
+            
+            // Remover activas
+            document.querySelectorAll('.role-panel').forEach(p => p.classList.remove('active'));
+            
+            if (role === 'estudiante') {
+                badge.innerText = 'Estudiante';
+                badge.style.background = 'rgba(99, 102, 241, 0.2)';
+                badge.style.color = '#a5b4fc';
+                document.getElementById('panel-estudiante').classList.add('active');
+            } else if (role === 'docente') {
+                badge.innerText = 'Docente';
+                badge.style.background = 'rgba(217, 70, 239, 0.2)';
+                badge.style.color = '#f5d0fe';
+                document.getElementById('panel-docente').classList.add('active');
+            } else if (role === 'admin') {
+                badge.innerText = 'Administrador';
+                badge.style.background = 'rgba(16, 185, 129, 0.2)';
+                badge.style.color = '#a7f3d0';
+                document.getElementById('panel-admin').classList.add('active');
+            }
+
+            // Refrescar vistas
+            renderDisponibilidades();
+            renderTutorias();
+        }
+
+        // Renderizado de tarjetas de disponibilidad
+        function renderDisponibilidades() {
+            const container = document.getElementById('availabilities-list');
+            if (disponibilidades.length === 0) {
+                container.innerHTML = '<p style="grid-column: 1/-1; color: var(--text-muted); text-align: center; padding: 2rem;">No hay disponibilidades registradas.</p>';
+                return;
+            }
+
+            container.innerHTML = disponibilidades.map(d => {
+                const doc = users.find(u => u.id === d.docenteId);
+                const mat = materias.find(m => m.id === d.materiaId);
+                const docName = doc ? doc.correo : d.docenteId;
+                const matName = mat ? mat.nombre : d.materiaId;
+                
+                const reservedBadge = d.reservado 
+                    ? `<span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #fca5a5; border-color: rgba(239, 68, 68, 0.3)">Reservada</span>`
+                    : `<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border-color: rgba(16, 185, 129, 0.3)">Disponible</span>`;
+
+                return `
+                    <div class="availability-card">
+                        <div class="availability-info">
+                            <div style="font-weight: 600; font-size: 1rem; color: #a5b4fc;">${matName}</div>
+                            <div style="font-size: 0.9rem;">Docente: ${docName}</div>
+                            <div class="availability-meta">Fecha: ${d.fecha}</div>
+                            <div class="availability-meta">Horario: ${d.horaInicio} - ${d.horaFin}</div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            ${reservedBadge}
+                            ${!d.reservado && document.getElementById('user-role-select').value === 'estudiante' 
+                                ? `<button class="btn btn-primary btn-sm" onclick="selectDisponibilidadForBooking('${d.id}')">Agendar</button>` 
+                                : ''
+                            }
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Rellenar select del formulario de agendamiento
+        function populateAgendaDisponibilidades() {
+            const select = document.getElementById('agenda-disponibilidad');
+            const listLibres = disponibilidades.filter(d => !d.reservado);
+            
+            if (listLibres.length === 0) {
+                select.innerHTML = '<option value="">No hay disponibilidades libres</option>';
+                return;
+            }
+
+            select.innerHTML = '<option value="">-- Seleccionar horario libre --</option>' + listLibres.map(d => {
+                const mat = materias.find(m => m.id === d.materiaId);
+                const matName = mat ? mat.nombre : d.materiaId;
+                return `<option value="${d.id}">${d.fecha} [${d.horaInicio}-${d.horaFin}] - ${matName}</option>`;
+            }).join('');
+        }
+
+        // Selección directa de disponibilidad desde tarjeta
+        function selectDisponibilidadForBooking(dispId) {
+            document.getElementById('agenda-disponibilidad').value = dispId;
+            onDisponibilidadSelect();
+            // Scroll a formulario
+            document.getElementById('agendar-form').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Autorellenar datos al seleccionar disponibilidad
+        function onDisponibilidadSelect() {
+            const dispId = document.getElementById('agenda-disponibilidad').value;
+            if (!dispId) {
+                document.getElementById('agenda-docente-id').value = '';
+                document.getElementById('agenda-materia-id').value = '';
+                document.getElementById('agenda-inicio').value = '';
+                document.getElementById('agenda-fin').value = '';
+                return;
+            }
+
+            const d = disponibilidades.find(x => x.id === dispId);
+            if (d) {
+                document.getElementById('agenda-docente-id').value = d.docenteId;
+                document.getElementById('agenda-materia-id').value = d.materiaId;
+                
+                // Formatear LocalDateTime
+                document.getElementById('agenda-inicio').value = `${d.fecha}T${d.horaInicio}`;
+                document.getElementById('agenda-fin').value = `${d.fecha}T${d.horaFin}`;
+            }
+        }
+
+        // Renderizado del historial de tutorías
+        function renderTutorias() {
+            const body = document.getElementById('tutorias-table-body');
+            if (tutorias.length === 0) {
+                body.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No hay tutorías agendadas.</td></tr>';
+                return;
+            }
+
+            const currentRole = document.getElementById('user-role-select').value;
+
+            body.innerHTML = tutorias.map(t => {
+                const est = users.find(u => u.id === t.estudianteId);
+                const doc = users.find(u => u.id === t.docenteId);
+                const mat = materias.find(m => m.id === t.materiaId);
+                
+                const estMail = est ? est.correo : t.estudianteId;
+                const docMail = doc ? doc.correo : t.docenteId;
+                const matName = mat ? mat.nombre : t.materiaId;
+
+                // Formatear fecha y hora legible
+                const fechaLegible = t.fechaHoraInicio.replace('T', ' ');
+
+                let acciones = '';
+                if (currentRole === 'estudiante' && t.estudianteId === 'est1' && (t.estado === 'PENDIENTE' || t.estado === 'CONFIRMADA')) {
+                    acciones = `<button class="btn btn-danger btn-sm" onclick="cancelarTutoria('${t.id}')">Cancelar</button>`;
+                } else if (currentRole === 'docente' && t.docenteId === 'doc1') {
+                    if (t.estado === 'PENDIENTE') {
+                        acciones = `<button class="btn btn-primary btn-sm" onclick="confirmarTutoria('${t.id}')">Confirmar</button>`;
+                    } else if (t.estado === 'CONFIRMADA') {
+                        acciones = `
+                            <div class="flex-actions">
+                                <button class="btn btn-primary btn-sm" style="background: var(--success);" onclick="registrarAsistencia('${t.id}')">Asistió</button>
+                                <button class="btn btn-danger btn-sm" onclick="registrarInasistencia('${t.id}')">Inasistencia</button>
+                            </div>
+                        `;
+                    }
+                }
+
+                return `
+                    <tr>
+                        <td style="font-family: monospace; font-size: 0.8rem; color: var(--text-muted);">${t.id.substring(0, 8)}...</td>
+                        <td>${estMail}</td>
+                        <td>${docMail}</td>
+                        <td>${matName}</td>
+                        <td style="font-size: 0.85rem;">${fechaLegible}</td>
+                        <td><span class="status-pill status-${t.estado.toLowerCase()}">${t.estado}</span></td>
+                        <td>${acciones || '-'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Envío de Formularios / Acciones de API
+
+        async function registrarDisponibilidad(e) {
+            e.preventDefault();
+            const payload = {
+                docenteId: document.getElementById('disp-docente-id').value,
+                materiaId: document.getElementById('disp-materia').value,
+                fecha: document.getElementById('disp-fecha').value,
+                horaInicio: document.getElementById('disp-hora-inicio').value + ':00',
+                horaFin: document.getElementById('disp-hora-fin').value + ':00'
+            };
+
+            try {
+                const res = await fetch('/api/disponibilidades', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await res.text();
+                if (res.ok) {
+                    showAlert('¡Disponibilidad registrada correctamente!', 'success');
+                    document.getElementById('disp-hora-inicio').value = '';
+                    document.getElementById('disp-hora-fin').value = '';
+                    fetchData();
+                } else {
+                    const err = JSON.parse(data);
+                    showAlert(err.error || 'Error al registrar disponibilidad.', 'danger');
+                }
+            } catch (error) {
+                showAlert('Fallo de red al registrar disponibilidad.', 'danger');
+            }
+        }
+
+        async function agendarTutoria(e) {
+            e.preventDefault();
+            const payload = {
+                estudianteId: document.getElementById('agenda-estudiante-id').value,
+                docenteId: document.getElementById('agenda-docente-id').value,
+                materiaId: document.getElementById('agenda-materia-id').value,
+                disponibilidadId: document.getElementById('agenda-disponibilidad').value,
+                fechaHoraInicio: document.getElementById('agenda-inicio').value,
+                fechaHoraFin: document.getElementById('agenda-fin').value,
+                motivo: document.getElementById('agenda-motivo').value
+            };
+
+            try {
+                const res = await fetch('/api/tutorias', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await res.text();
+                if (res.ok) {
+                    showAlert('¡Tutoría agendada con éxito en estado PENDIENTE!', 'success');
+                    document.getElementById('agenda-motivo').value = '';
+                    fetchData();
+                } else {
+                    const err = JSON.parse(data);
+                    showAlert(err.error || 'Error al agendar tutoría.', 'danger');
+                }
+            } catch (error) {
+                showAlert('Fallo de red al agendar tutoría.', 'danger');
+            }
+        }
+
+        async function registrarUsuario(e) {
+            e.preventDefault();
+            const correo = document.getElementById('usr-correo').value;
+            const rol = document.getElementById('usr-rol').value;
+
+            try {
+                const res = await fetch(`/api/usuarios?correo=${encodeURIComponent(correo)}&rol=${rol}`, {
+                    method: 'POST'
+                });
+                
+                const data = await res.text();
+                if (res.ok) {
+                    showAlert(`Usuario registrado correctamente con ID: ${data}`, 'success');
+                    document.getElementById('usr-correo').value = '';
+                    fetchData();
+                } else {
+                    const err = JSON.parse(data);
+                    showAlert(err.error || 'Error al registrar usuario.', 'danger');
+                }
+            } catch (error) {
+                showAlert('Fallo de red al registrar usuario.', 'danger');
+            }
+        }
+
+        async function confirmarTutoria(id) {
+            try {
+                const res = await fetch(`/api/tutorias/${id}/confirmar?docenteId=doc1`, {
+                    method: 'PUT'
+                });
+                if (res.ok) {
+                    showAlert('Tutoría confirmada exitosamente.', 'success');
+                    fetchTutorias();
+                } else {
+                    const err = await res.json();
+                    showAlert(err.error || 'Error al confirmar tutoría.', 'danger');
+                }
+            } catch (error) {
+                showAlert('Fallo de red al confirmar tutoría.', 'danger');
+            }
+        }
+
+        async function cancelarTutoria(id) {
+            try {
+                const res = await fetch(`/api/tutorias/${id}/cancelar?estudianteId=est1`, {
+                    method: 'PUT'
+                });
+                if (res.ok) {
+                    showAlert('Tutoría cancelada correctamente.', 'success');
+                    fetchData(); // Necesitamos refrescar las disponibilidades también para verla liberada
+                } else {
+                    const err = await res.json();
+                    showAlert(err.error || 'Error al cancelar tutoría.', 'danger');
+                }
+            } catch (error) {
+                showAlert('Fallo de red al cancelar tutoría.', 'danger');
+            }
+        }
+
+        async function registrarAsistencia(id) {
+            try {
+                const res = await fetch(`/api/tutorias/${id}/asistencia?docenteId=doc1`, {
+                    method: 'PUT'
+                });
+                if (res.ok) {
+                    showAlert('Asistencia registrada correctamente.', 'success');
+                    fetchTutorias();
+                } else {
+                    const err = await res.json();
+                    showAlert(err.error || 'Error al registrar asistencia.', 'danger');
+                }
+            } catch (error) {
+                showAlert('Fallo de red al registrar asistencia.', 'danger');
+            }
+        }
+
+        async function registrarInasistencia(id) {
+            try {
+                const res = await fetch(`/api/tutorias/${id}/inasistencia?docenteId=doc1`, {
+                    method: 'PUT'
+                });
+                if (res.ok) {
+                    showAlert('Inasistencia registrada correctamente.', 'success');
+                    fetchTutorias();
+                } else {
+                    const err = await res.json();
+                    showAlert(err.error || 'Error al registrar inasistencia.', 'danger');
+                }
+            } catch (error) {
+                showAlert('Fallo de red al registrar inasistencia.', 'danger');
+            }
+        }
+
+        // Mostrar Alertas
+        function showAlert(msg, type) {
+            const box = document.getElementById('alert-box');
+            box.innerText = msg;
+            box.className = `alert alert-${type}`;
+            box.style.display = 'block';
+            
+            // Autoocultar en 5 segundos
+            setTimeout(() => {
+                box.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
